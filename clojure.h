@@ -30,38 +30,37 @@
 
 /* simplify references to void pointers */
 typedef void* gptr;
-
 /* linked list is constructed of pairs */
-typedef struct pair_s {
+typedef struct pair {
   gptr data;
-  struct pair_s *next;
+  struct pair *next;
 } pair;
 
 /* a list is just a pointer to the pair at the head of the list */
 typedef pair* list;
 /* a hashmap is just a list with alternating key/value pairs */
-typedef list hashmap;
+typedef pair* hashmap;
 
-typedef struct ns_s {
+typedef struct ns {
   hashmap mappings;
 } ns;
 
-typedef struct Env_s {
-  struct Env_s* outer;
+typedef struct Env {
+  struct Env* outer;
   hashmap data;
 } Env;
 
-typedef struct MalType_s MalType;
+typedef struct MalType MalType;
 // typedef struct MalClosure_s MalClosure;
 
-typedef struct MalClosure_s {
+typedef struct MalClosure {
   Env* env;
   MalType* parameters;
   MalType* more_symbol;
   MalType* definition;
 } MalClosure;
 
-typedef struct MalType_s {
+typedef struct MalType {
   int type;
   int is_macro;
   MalType* metadata;
@@ -80,27 +79,21 @@ typedef struct MalType_s {
     MalType* mal_atom;
     MalType* mal_error;
   } value;
-  
+
 } MalType;
 
-
-
-typedef struct Token_s {
-
+typedef struct Token {
   int type;
   char* data;
   char* error;
-
 } Token;
 
-typedef struct Reader_s {
-
+typedef struct Reader {
   long position;      // current position in the array
   long token_count;   // number of tokens in the array
   long max_tokens;    // maximum number of tokens the array can hold
   Token** token_data; // pointer to an array of Tokens
   char* error;        // error message
-
 } Reader;
 
 /* interface */
@@ -116,8 +109,6 @@ long list_count(list lst);
 list list_concatenate(list lst1, list lst2);
 list list_copy(list lst);
 long list_findf(list lst, char* keystring, char*(*fn)(gptr));
-
-
 
 hashmap hashmap_make(char* keystring, gptr data_ptr);
 hashmap hashmap_put(hashmap map, char* keystring, gptr data_ptr);

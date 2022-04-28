@@ -3516,78 +3516,6 @@ MalType* mal_readline(list args) {
   }
 }
 
-int main(int argc, char** argv) {
-
-  Env* repl_env = env_make(NULL, NULL, NULL, NULL);
-  global_env = repl_env;
-
-  ns* core = ns_make_core();
-  hashmap mappings = core->mappings;
-
-  while (mappings) {
-    char* symbol = mappings->data;
-    MalType*(*function)(list) = mappings->next->data;
-
-    env_set_C_fn(repl_env, symbol, function);
-
-    /* pop symbol and function from hashmap/list */
-    mappings = mappings->next->next;
-  }
-
-  env_set_C_fn(repl_env, "eval", mal_eval);
-  env_set_C_fn(repl_env, "readline", mal_readline);
-
-  /* add functions written in mal - not using rep as it prints the result */
-  EVAL(READ("(def! not (fn* (a) (if a false true)))"), repl_env);
-  EVAL(READ("(def! load-file (fn* (f) (eval (read-string (str \"(do \" (slurp f) \"\nnil)\")))))"), repl_env);
-  EVAL(READ("(defmacro! cond (fn* (& xs) (if (> (count xs) 0) (list 'if (first xs) (if (> (count xs) 1) (nth xs 1) (throw \"odd number of forms to cond\")) (cons 'cond (rest (rest xs)))))))"), repl_env);
-
-  /* make command line arguments available in the environment */
-  list lst = NULL;
-  for (long i = 2; i < argc; i++) {
-    lst = list_push(lst, make_string(argv[i]));
-  }
-  env_set(repl_env, make_symbol("*ARGV*"), make_list(list_reverse(lst)));
-  env_set(repl_env, make_symbol("*host-language*"), make_string("c.2"));
-
-  /* run in script mode if a filename is given */
-  if (argc > 1) {
-
-    /* first argument on command line is filename */
-    char* load_command = snprintfbuf(1024, "(load-file \"%s\")", argv[1]);
-    EVAL(READ(load_command), repl_env);
-  }
-  /* run in repl mode when no cmd line args */
-  else {
-
-    /* Greeting message */
-    EVAL(READ("(println (str \"Mal [\" *host-language* \"]\"))"), repl_env);
-
-    while (1) {
-
-      /* print prompt and get input*/
-      /* readline allocates memory for input */
-      char* input = readline(PROMPT_STRING);
-
-      /* Check for EOF (Ctrl-D) */
-      if (!input) {
-        printf("\n");
-        return 0;
-      }
-
-      /* add input to history */
-      add_history(input);
-
-      /* call Read-Eval-Print */
-      rep(input, repl_env);
-
-      /* have to release the memory used by readline */
-      free(input);
-    }
-  }
-  return 0;
-}
-
 MalType* eval_ast(MalType* ast, Env* env) {
 
   /* forward references */
@@ -4284,6 +4212,78 @@ int is_macro_call(MalType* ast, Env* env) {
   else {
     return (val->is_macro);
   }
+}
+
+int main(int argc, char** argv) {
+
+  Env* repl_env = env_make(NULL, NULL, NULL, NULL);
+  global_env = repl_env;
+
+  ns* core = ns_make_core();
+  hashmap mappings = core->mappings;
+
+  while (mappings) {
+    char* symbol = mappings->data;
+    MalType*(*function)(list) = mappings->next->data;
+
+    env_set_C_fn(repl_env, symbol, function);
+
+    /* pop symbol and function from hashmap/list */
+    mappings = mappings->next->next;
+  }
+
+  env_set_C_fn(repl_env, "eval", mal_eval);
+  env_set_C_fn(repl_env, "readline", mal_readline);
+
+  /* add functions written in mal - not using rep as it prints the result */
+  EVAL(READ("(def! not (fn* (a) (if a false true)))"), repl_env);
+  EVAL(READ("(def! load-file (fn* (f) (eval (read-string (str \"(do \" (slurp f) \"\nnil)\")))))"), repl_env);
+  EVAL(READ("(defmacro! cond (fn* (& xs) (if (> (count xs) 0) (list 'if (first xs) (if (> (count xs) 1) (nth xs 1) (throw \"odd number of forms to cond\")) (cons 'cond (rest (rest xs)))))))"), repl_env);
+
+  /* make command line arguments available in the environment */
+  list lst = NULL;
+  for (long i = 2; i < argc; i++) {
+    lst = list_push(lst, make_string(argv[i]));
+  }
+  env_set(repl_env, make_symbol("*ARGV*"), make_list(list_reverse(lst)));
+  env_set(repl_env, make_symbol("*host-language*"), make_string("c.2"));
+
+  /* run in script mode if a filename is given */
+  if (argc > 1) {
+
+    /* first argument on command line is filename */
+    char* load_command = snprintfbuf(1024, "(load-file \"%s\")", argv[1]);
+    EVAL(READ(load_command), repl_env);
+  }
+  /* run in repl mode when no cmd line args */
+  else {
+
+    /* Greeting message */
+    EVAL(READ("(println (str \"Mal [\" *host-language* \"]\"))"), repl_env);
+
+    while (1) {
+
+      /* print prompt and get input*/
+      /* readline allocates memory for input */
+      char* input = readline(PROMPT_STRING);
+
+      /* Check for EOF (Ctrl-D) */
+      if (!input) {
+        printf("\n");
+        return 0;
+      }
+
+      /* add input to history */
+      add_history(input);
+
+      /* call Read-Eval-Print */
+      rep(input, repl_env);
+
+      /* have to release the memory used by readline */
+      free(input);
+    }
+  }
+  return 0;
 }
 
 // gcc clojure.c -ledit -lgc
