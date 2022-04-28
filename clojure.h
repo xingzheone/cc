@@ -63,7 +63,20 @@ struct ns_s {
 typedef struct MalType_s MalType;
 typedef struct MalClosure_s MalClosure;
 typedef struct Env_s Env;
+typedef struct Env_s Env;
 
+struct Env_s {
+
+  struct Env_s* outer;
+  hashmap data;
+
+};
+
+Env* env_make(Env* outer, list binds, list exprs, MalType* variadic_symbol);
+Env* env_set(Env* current, MalType* symbol, MalType* value);
+Env* env_set_C_fn(Env* current, char* symbol_name, MalType*(*fn)(list));
+MalType* env_get(Env* current, MalType* symbol);
+Env* env_find(Env* current, MalType* symbol);
 struct MalType_s {
 
   int type;
