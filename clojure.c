@@ -1,12 +1,4 @@
-#include <stdio.h>
-#include <string.h>
-#include <sys/time.h>
-#include <math.h>
-#include <gc.h>
-#include <stdarg.h>
 
-#include <editline/readline.h>
-#include <editline/history.h>
 
 #include "clojure.h"
 
@@ -27,6 +19,19 @@
 #define SYMBOL_CATCHSTAR "catch*"
 
 #define PROMPT_STRING "user> "
+
+#define STRING_BUFFER_SIZE 256
+
+#define PRINT_NIL "nil"
+#define PRINT_TRUE "true"
+#define PRINT_FALSE "false"
+
+#define INTEGER_BUFFER_SIZE 16
+#define SYMBOL_BUFFER_SIZE 32
+#define FUNCTION_BUFFER_SIZE 256
+// #define STRING_BUFFER_SIZE 256
+#define LIST_BUFFER_SIZE 1024
+#define ERROR_BUFFER_SIZE 128
 
 //list.c
 list list_make(gptr data_ptr) {
@@ -286,7 +291,7 @@ hashmap hashmap_updatef(hashmap map, char* keystring, gptr value, char*(*fn)(gpt
 }
 // end hashmap.c
 // type.c
-#define ERROR_BUFFER_SIZE 128
+
 
 MalType THE_TRUE = {MALTYPE_TRUE, 0, 0, {0}};
 MalType THE_FALSE = {MALTYPE_FALSE, 0, 0, {0}};
@@ -1290,7 +1295,6 @@ Env* env_set_C_fn(Env* current, char* symbol_name, MalType*(*fn)(list)) {
 // end env.c
 
 // core.c
-#define STRING_BUFFER_SIZE 128
 
 /* forward references to main file */
 MalType* apply(MalType* fn, list args);
@@ -3074,15 +3078,7 @@ char* get_fn(gptr data) {
 
 //  printer.c
 
-#define PRINT_NIL "nil"
-#define PRINT_TRUE "true"
-#define PRINT_FALSE "false"
 
-#define INTEGER_BUFFER_SIZE 16
-#define SYMBOL_BUFFER_SIZE 32
-#define FUNCTION_BUFFER_SIZE 256
-#define STRING_BUFFER_SIZE 256
-#define LIST_BUFFER_SIZE 1024
 
 char* pr_str(MalType* val, int readably) {
 
@@ -4291,3 +4287,4 @@ int is_macro_call(MalType* ast, Env* env) {
 }
 
 // gcc clojure.c -ledit -lgc
+// gcc -std=c99 -g -Wall clojure.c -ledit -lgc

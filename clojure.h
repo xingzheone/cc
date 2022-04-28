@@ -1,49 +1,14 @@
+#include <stdio.h>
+#include <string.h>
+#include <stdlib.h>
+#include <sys/time.h>
+#include <math.h>
+#include <gc.h>
+#include <stdarg.h>
+#include <ctype.h>
 
-/* simplify references to void pointers */
-typedef void* gptr;
-
-/* linked list is constructed of pairs */
-typedef struct pair_s {
-
-  gptr data;
-  struct pair_s *next;
-
-} pair;
-
-/* a list is just a pointer to the pair at the head of the list */
-typedef pair* list;
-
-/* interface */
-list list_make(gptr data_ptr);
-list list_push(list lst, gptr data_ptr);
-gptr list_peek(list lst);
-gptr list_nth(list lst, int n);
-gptr list_first(list lst);
-list list_rest(list lst);
-list list_pop(list lst);
-list list_reverse(list lst);
-long list_count(list lst);
-list list_concatenate(list lst1, list lst2);
-list list_copy(list lst);
-long list_findf(list lst, char* keystring, char*(*fn)(gptr));
-
-/* a hashmap is just a list with alternating key/value pairs */
-typedef list hashmap;
-
-hashmap hashmap_make(char* keystring, gptr data_ptr);
-hashmap hashmap_put(hashmap map, char* keystring, gptr data_ptr);
-gptr hashmap_get(hashmap map, char* keystring);
-gptr hashmap_getf(hashmap map, char* keystring, char*(*fn)(gptr));
-hashmap hashmap_updatef(hashmap map, char* keystring, gptr value, char*(*fn)(gptr));
-
-
-typedef struct ns_s ns;
-
-struct ns_s {
-
-  hashmap mappings;
-
-};
+#include <editline/readline.h>
+#include <editline/history.h>
 #define MALTYPE_SYMBOL 1
 #define MALTYPE_KEYWORD 2
 #define MALTYPE_INTEGER 3
@@ -59,6 +24,54 @@ struct ns_s {
 #define MALTYPE_CLOSURE 13
 #define MALTYPE_ERROR 14
 #define MALTYPE_ATOM 15
+
+#define UNREADABLY 0
+#define READABLY 1
+
+/* simplify references to void pointers */
+typedef void* gptr;
+
+/* linked list is constructed of pairs */
+typedef struct pair_s {
+  gptr data;
+  struct pair_s *next;
+} pair;
+
+/* a list is just a pointer to the pair at the head of the list */
+typedef pair* list;
+/* a hashmap is just a list with alternating key/value pairs */
+typedef list hashmap;
+
+typedef struct ns_s ns;
+
+struct ns_s {
+  hashmap mappings;
+};
+
+/* interface */
+list list_make(gptr data_ptr);
+list list_push(list lst, gptr data_ptr);
+gptr list_peek(list lst);
+gptr list_nth(list lst, int n);
+gptr list_first(list lst);
+list list_rest(list lst);
+list list_pop(list lst);
+list list_reverse(list lst);
+long list_count(list lst);
+list list_concatenate(list lst1, list lst2);
+list list_copy(list lst);
+long list_findf(list lst, char* keystring, char*(*fn)(gptr));
+
+
+
+hashmap hashmap_make(char* keystring, gptr data_ptr);
+hashmap hashmap_put(hashmap map, char* keystring, gptr data_ptr);
+gptr hashmap_get(hashmap map, char* keystring);
+gptr hashmap_getf(hashmap map, char* keystring, char*(*fn)(gptr));
+hashmap hashmap_updatef(hashmap map, char* keystring, gptr value, char*(*fn)(gptr));
+
+
+
 
 typedef struct MalType_s MalType;
 typedef struct MalClosure_s MalClosure;
@@ -209,8 +222,7 @@ MalType* make_symbol_list(Reader* reader, char* symbol_name);
 Token* token_allocate(char* str, long num_chars, int type, char* error);
 char* unescape_string(char* str, long length);
 
-#define UNREADABLY 0
-#define READABLY 1
+
 
 char* pr_str(MalType* mal_val, int readably);
 char* pr_str_list(list lst, int readably, char* start_delimiter, char* end_delimiter, char* separator);
