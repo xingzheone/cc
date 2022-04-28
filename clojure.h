@@ -48,50 +48,16 @@ struct ns_s {
   hashmap mappings;
 };
 
-/* interface */
-list list_make(gptr data_ptr);
-list list_push(list lst, gptr data_ptr);
-gptr list_peek(list lst);
-gptr list_nth(list lst, int n);
-gptr list_first(list lst);
-list list_rest(list lst);
-list list_pop(list lst);
-list list_reverse(list lst);
-long list_count(list lst);
-list list_concatenate(list lst1, list lst2);
-list list_copy(list lst);
-long list_findf(list lst, char* keystring, char*(*fn)(gptr));
-
-
-
-hashmap hashmap_make(char* keystring, gptr data_ptr);
-hashmap hashmap_put(hashmap map, char* keystring, gptr data_ptr);
-gptr hashmap_get(hashmap map, char* keystring);
-gptr hashmap_getf(hashmap map, char* keystring, char*(*fn)(gptr));
-hashmap hashmap_updatef(hashmap map, char* keystring, gptr value, char*(*fn)(gptr));
-
-
-
-
 typedef struct MalType_s MalType;
 typedef struct MalClosure_s MalClosure;
 typedef struct Env_s Env;
 typedef struct Env_s Env;
 
 struct Env_s {
-
   struct Env_s* outer;
   hashmap data;
-
 };
-
-Env* env_make(Env* outer, list binds, list exprs, MalType* variadic_symbol);
-Env* env_set(Env* current, MalType* symbol, MalType* value);
-Env* env_set_C_fn(Env* current, char* symbol_name, MalType*(*fn)(list));
-MalType* env_get(Env* current, MalType* symbol);
-Env* env_find(Env* current, MalType* symbol);
 struct MalType_s {
-
   int type;
   int is_macro;
   MalType* metadata;
@@ -115,13 +81,58 @@ struct MalType_s {
 };
 
 struct MalClosure_s {
-
   Env* env;
   MalType* parameters;
   MalType* more_symbol;
   MalType* definition;
-
 };
+
+
+typedef struct Token_s {
+
+  int type;
+  char* data;
+  char* error;
+
+} Token;
+
+typedef struct Reader_s {
+
+  long position;      // current position in the array
+  long token_count;   // number of tokens in the array
+  long max_tokens;    // maximum number of tokens the array can hold
+  Token** token_data; // pointer to an array of Tokens
+  char* error;        // error message
+
+} Reader;
+
+/* interface */
+list list_make(gptr data_ptr);
+list list_push(list lst, gptr data_ptr);
+gptr list_peek(list lst);
+gptr list_nth(list lst, int n);
+gptr list_first(list lst);
+list list_rest(list lst);
+list list_pop(list lst);
+list list_reverse(list lst);
+long list_count(list lst);
+list list_concatenate(list lst1, list lst2);
+list list_copy(list lst);
+long list_findf(list lst, char* keystring, char*(*fn)(gptr));
+
+
+
+hashmap hashmap_make(char* keystring, gptr data_ptr);
+hashmap hashmap_put(hashmap map, char* keystring, gptr data_ptr);
+gptr hashmap_get(hashmap map, char* keystring);
+gptr hashmap_getf(hashmap map, char* keystring, char*(*fn)(gptr));
+hashmap hashmap_updatef(hashmap map, char* keystring, gptr value, char*(*fn)(gptr));
+
+Env* env_make(Env* outer, list binds, list exprs, MalType* variadic_symbol);
+Env* env_set(Env* current, MalType* symbol, MalType* value);
+Env* env_set_C_fn(Env* current, char* symbol_name, MalType*(*fn)(list));
+MalType* env_get(Env* current, MalType* symbol);
+Env* env_find(Env* current, MalType* symbol);
 
 MalType* make_symbol(char* value);
 MalType* make_integer(long value);
@@ -170,25 +181,6 @@ char* get_fn(gptr data);
 MalType* equal_lists(MalType* lst1, MalType* lst2);
 MalType* equal_hashmaps(MalType* map1, MalType* map2);
 
-
-typedef struct Token_s {
-
-  int type;
-  char* data;
-  char* error;
-
-} Token;
-
-typedef struct Reader_s {
-
-  long position;      // current position in the array
-  long token_count;   // number of tokens in the array
-  long max_tokens;    // maximum number of tokens the array can hold
-  Token** token_data; // pointer to an array of Tokens
-  char* error;        // error message
-
-} Reader;
-
 /* reader object */
 Reader* reader_make(long token_capacity);
 Reader* reader_append(Reader* reader, Token* token);
@@ -221,8 +213,6 @@ MalType* read_matched_delimiters(Reader* reader, char start_delimiter, char end_
 MalType* make_symbol_list(Reader* reader, char* symbol_name);
 Token* token_allocate(char* str, long num_chars, int type, char* error);
 char* unescape_string(char* str, long length);
-
-
 
 char* pr_str(MalType* mal_val, int readably);
 char* pr_str_list(list lst, int readably, char* start_delimiter, char* end_delimiter, char* separator);
