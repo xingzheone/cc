@@ -42,28 +42,31 @@ typedef pair* list;
 /* a hashmap is just a list with alternating key/value pairs */
 typedef list hashmap;
 
-typedef struct ns_s ns;
-
-struct ns_s {
+typedef struct ns_s {
   hashmap mappings;
-};
+} ns;
 
-typedef struct MalType_s MalType;
-typedef struct MalClosure_s MalClosure;
-typedef struct Env_s Env;
-typedef struct Env_s Env;
-
-struct Env_s {
+typedef struct Env_s {
   struct Env_s* outer;
   hashmap data;
-};
-struct MalType_s {
+} Env;
+
+typedef struct MalType_s MalType;
+// typedef struct MalClosure_s MalClosure;
+
+typedef struct MalClosure_s {
+  Env* env;
+  MalType* parameters;
+  MalType* more_symbol;
+  MalType* definition;
+} MalClosure;
+
+typedef struct MalType_s {
   int type;
   int is_macro;
   MalType* metadata;
 
   union MalValue {
-
     long mal_integer;
     double mal_float;
     char* mal_symbol;
@@ -76,16 +79,10 @@ struct MalType_s {
     MalClosure* mal_closure;
     MalType* mal_atom;
     MalType* mal_error;
-
   } value;
-};
+  
+} MalType;
 
-struct MalClosure_s {
-  Env* env;
-  MalType* parameters;
-  MalType* more_symbol;
-  MalType* definition;
-};
 
 
 typedef struct Token_s {
