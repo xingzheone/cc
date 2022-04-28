@@ -20,13 +20,65 @@
 #define MALTYPE_LIST 9
 #define MALTYPE_VECTOR 10
 #define MALTYPE_HASHMAP 11
-#define MALTYPE_FUNCTION 12
-#define MALTYPE_CLOSURE 13
+#define MALTYPE_FUNCTION 12  //native function
+#define MALTYPE_CLOSURE 13   //user custom function
 #define MALTYPE_ERROR 14
 #define MALTYPE_ATOM 15
 
 #define UNREADABLY 0
 #define READABLY 1
+
+#define SYMBOL_DEFBANG "def!"
+#define SYMBOL_LETSTAR "let*"
+#define SYMBOL_DO "do"
+#define SYMBOL_IF "if"
+#define SYMBOL_FNSTAR "fn*"
+#define SYMBOL_QUOTE "quote"
+#define SYMBOL_QUASIQUOTE "quasiquote"
+#define SYMBOL_QUASIQUOTEEXPAND "quasiquoteexpand"
+#define SYMBOL_UNQUOTE "unquote"
+#define SYMBOL_SPLICE_UNQUOTE "splice-unquote"
+#define SYMBOL_DEFMACROBANG "defmacro!"
+#define SYMBOL_MACROEXPAND "macroexpand"
+#define SYMBOL_TRYSTAR "try*"
+#define SYMBOL_CATCHSTAR "catch*"
+
+#define PROMPT_STRING "user> "
+
+#define STRING_BUFFER_SIZE 256
+
+#define PRINT_NIL "nil"
+#define PRINT_TRUE "true"
+#define PRINT_FALSE "false"
+
+#define INTEGER_BUFFER_SIZE 16
+#define SYMBOL_BUFFER_SIZE 32
+#define FUNCTION_BUFFER_SIZE 256
+// #define STRING_BUFFER_SIZE 256
+#define LIST_BUFFER_SIZE 1024
+#define ERROR_BUFFER_SIZE 128
+
+// read
+#define TOKEN_SPECIAL_CHARACTER 1
+#define TOKEN_STRING 2
+#define TOKEN_INTEGER 3
+#define TOKEN_FLOAT 4
+#define TOKEN_SYMBOL 5
+#define TOKEN_COMMENT 6
+#define TOKEN_KEYWORD 7
+#define TOKEN_TRUE 8
+#define TOKEN_FALSE 9
+#define TOKEN_NIL 10
+
+#define SYMBOL_NIL "nil"
+#define SYMBOL_TRUE "true"
+#define SYMBOL_FALSE "false"
+#define SYMBOL_QUOTE "quote"
+#define SYMBOL_QUASIQUOTE "quasiquote"
+#define SYMBOL_UNQUOTE  "unquote"
+#define SYMBOL_SPLICE_UNQUOTE "splice-unquote"
+#define SYMBOL_DEREF "deref"
+#define SYMBOL_WITH_META "with-meta"
 
 /* simplify references to void pointers */
 typedef void* gptr;

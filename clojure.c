@@ -3,35 +3,7 @@
 #include "clojure.h"
 
 
-#define SYMBOL_DEFBANG "def!"
-#define SYMBOL_LETSTAR "let*"
-#define SYMBOL_DO "do"
-#define SYMBOL_IF "if"
-#define SYMBOL_FNSTAR "fn*"
-#define SYMBOL_QUOTE "quote"
-#define SYMBOL_QUASIQUOTE "quasiquote"
-#define SYMBOL_QUASIQUOTEEXPAND "quasiquoteexpand"
-#define SYMBOL_UNQUOTE "unquote"
-#define SYMBOL_SPLICE_UNQUOTE "splice-unquote"
-#define SYMBOL_DEFMACROBANG "defmacro!"
-#define SYMBOL_MACROEXPAND "macroexpand"
-#define SYMBOL_TRYSTAR "try*"
-#define SYMBOL_CATCHSTAR "catch*"
 
-#define PROMPT_STRING "user> "
-
-#define STRING_BUFFER_SIZE 256
-
-#define PRINT_NIL "nil"
-#define PRINT_TRUE "true"
-#define PRINT_FALSE "false"
-
-#define INTEGER_BUFFER_SIZE 16
-#define SYMBOL_BUFFER_SIZE 32
-#define FUNCTION_BUFFER_SIZE 256
-// #define STRING_BUFFER_SIZE 256
-#define LIST_BUFFER_SIZE 1024
-#define ERROR_BUFFER_SIZE 128
 
 //list.c
 list list_make(gptr data_ptr) {
@@ -571,27 +543,6 @@ MalType* copy_type(MalType* value) {
 
 // end type.c
 // reader.c
-
-#define TOKEN_SPECIAL_CHARACTER 1
-#define TOKEN_STRING 2
-#define TOKEN_INTEGER 3
-#define TOKEN_FLOAT 4
-#define TOKEN_SYMBOL 5
-#define TOKEN_COMMENT 6
-#define TOKEN_KEYWORD 7
-#define TOKEN_TRUE 8
-#define TOKEN_FALSE 9
-#define TOKEN_NIL 10
-
-#define SYMBOL_NIL "nil"
-#define SYMBOL_TRUE "true"
-#define SYMBOL_FALSE "false"
-#define SYMBOL_QUOTE "quote"
-#define SYMBOL_QUASIQUOTE "quasiquote"
-#define SYMBOL_UNQUOTE  "unquote"
-#define SYMBOL_SPLICE_UNQUOTE "splice-unquote"
-#define SYMBOL_DEREF "deref"
-#define SYMBOL_WITH_META "with-meta"
 
 Reader* reader_make(long token_capacity) {
 
@@ -3487,13 +3438,11 @@ void rep(char* str, Env* env) {
 Env* global_env;
 
 MalType* mal_eval(list args) {
-
   MalType* ast = args->data;
   return EVAL(ast, global_env);
 }
 
 MalType* mal_readline(list args) {
-
   if (!args || args->next) {
     return make_error("'readline': expected exactly one argument");
   }
