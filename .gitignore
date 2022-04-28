@@ -1,0 +1,8 @@
+*.out
+.idea
+.vscode
+/target
+/lib
+/classes
+*.jar
+*.class
