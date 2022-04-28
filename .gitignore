@@ -6,3 +6,4 @@
 /classes
 *.jar
 *.class
+clojure
