@@ -1,111 +1,79 @@
 
-
 #include "clojure.h"
-
-
-
-
 //list.c
 list list_make(gptr data_ptr) {
-
   return list_push(NULL, data_ptr);
 }
 
 list list_push(list lst, gptr data_ptr) {
-
   pair* new_head = GC_malloc(sizeof(pair));
   new_head->data = data_ptr;
   new_head->next = lst;
-
   return new_head;
 }
+//获取node data
+// gptr list_peek(list lst) {
+//   return (lst ? lst->data : NULL);
+// }
 
-gptr list_peek(list lst) {
-
-  return (lst ? lst->data : NULL);
-}
-
-list list_pop(list lst) {
-  return (lst ? lst->next : NULL);
-}
+// list list_pop(list lst) {
+//   return (lst ? lst->next : NULL);
+// }
 
 long list_count(list lst) {
-
   /* handle empty case */
   if (!lst) {
     return 0;
   }
-
   long counter = 1;
-
   while(lst->next) {
-
     counter++;
     lst = lst->next;
   }
-
   return counter;
 }
 
 list list_reverse(list lst) {
-
   /* list is not empty and has more than one element */
   if (lst && lst->next) {
-
     pair *prev = NULL, *next = NULL, *current = lst;
-
     while (current) {
-
       /* stash current value of next pointer --> */
       next = current->next;
-
       /* reverse the next pointer on current pair <-- */
       current->next = prev;
-
       /* move on to next pair and repeat --> */
       prev = current;
       current = next;
-
     }
-
     lst = prev; /* head of list is in prev when current = NULL */
   }
-
   return lst;
 }
 
 list list_concatenate(list lst1, list lst2) {
-
   list new_lst = NULL;
   list iterator = NULL;
-
   while (lst2) {
-
     gptr val = lst2->data;
     new_lst = list_push(new_lst, val);
     lst2 = lst2->next;
   }
   new_lst = list_reverse(new_lst);
-
   lst1 = list_reverse(lst1);
-
   iterator = lst1;
   while (iterator) {
-
     gptr val = iterator->data;
     new_lst = list_push(new_lst, val);
     iterator = iterator->next;
   }
-
   lst1 = list_reverse(lst1);
   return new_lst;
 }
 
 gptr list_nth(list lst, int n) {
-
   int idx = 0;
   while (lst) {
-
     if (n == idx) {
       return lst->data;
     }
@@ -116,7 +84,6 @@ gptr list_nth(list lst, int n) {
 }
 
 gptr list_first(list lst) {
-
   if (lst) {
     return lst->data;
   }
@@ -136,11 +103,9 @@ list list_rest(list lst) {
 }
 
 list list_copy(list lst) {
-
   if(!lst) {
     return NULL;
   }
-
   list new_lst = NULL;
   while(lst) {
 
@@ -149,9 +114,8 @@ list list_copy(list lst) {
   }
   return new_lst;
 }
-
+//传入查询函数 查询
 long list_findf(list lst, char* keystring, char*(*fn)(gptr)) {
-
   /* handle empty case */
   if (!lst) {
     return -1;
@@ -159,10 +123,8 @@ long list_findf(list lst, char* keystring, char*(*fn)(gptr)) {
 
   list current = lst;
   while(current) {
-
     /* apply fn to the data to get a string */
     char* item = fn(current->data);
-
     if (strcmp(keystring, item) == 0) {
       return (current - lst); /* return the index of the first match */
     }
@@ -174,33 +136,25 @@ long list_findf(list lst, char* keystring, char*(*fn)(gptr)) {
 }
 // end list.c
 // hashmap.c
-hashmap hashmap_make(char* keystring, gptr data_ptr) {
-
-  list map = list_make(data_ptr);
-  map = list_push(map, keystring);
-
-  return map;
-}
+// hashmap hashmap_make(char* keystring, gptr data_ptr) {
+//   list map = list_make(data_ptr);
+//   map = list_push(map, keystring);
+//   return map;
+// }
 
 hashmap hashmap_put(hashmap map, char* keystring, gptr data_ptr) {
-
   map = list_push(map, data_ptr);
   map = list_push(map, keystring);
-
   return map;
 }
 
 gptr hashmap_get(hashmap map, char* keystring) {
-
   /* handle empty case */
   if (!map) {
     return NULL;
   }
-
   list lst = map;
-
   while(lst) {
-
     if (strcmp(keystring, (char*)lst->data) == 0) {
         return (lst->next)->data; /* return next item in list which is the value */
       }
@@ -211,21 +165,15 @@ gptr hashmap_get(hashmap map, char* keystring) {
   return NULL; /* not found */
 }
 
-
 gptr hashmap_getf(hashmap map, char* keystring, char*(*fn)(gptr)) {
-
   /* handle empty case */
   if (!map) {
     return NULL;
   }
-
   list lst = map;
-
   while(lst) {
-
     /* apply fn to the data to get a string */
     char* item = fn(lst->data);
-
     if (strcmp(keystring, item) == 0) {
         return (lst->next)->data; /* return next item in list which is the value */
       }
@@ -237,19 +185,14 @@ gptr hashmap_getf(hashmap map, char* keystring, char*(*fn)(gptr)) {
 }
 
 hashmap hashmap_updatef(hashmap map, char* keystring, gptr value, char*(*fn)(gptr)) {
-
   /* handle empty case */
   if (!map) {
     return NULL;
   }
-
   list lst = map;
-
   while(lst) {
-
     /* apply fn to the data to get a string */
     char* item = fn(lst->data);
-
     if (strcmp(keystring, item) == 0) {
       (lst->next)->data = value; /* update the next item in list which is the value */
       return map; /* update made */
@@ -258,12 +201,10 @@ hashmap hashmap_updatef(hashmap map, char* keystring, gptr value, char*(*fn)(gpt
       lst = (lst->next)->next; /* skip the next item in the list to get to the next key */
     }
   }
-
   return NULL; /* no update */
 }
 // end hashmap.c
 // type.c
-
 
 MalType THE_TRUE = {MALTYPE_TRUE, 0, 0, {0}};
 MalType THE_FALSE = {MALTYPE_FALSE, 0, 0, {0}};
@@ -2773,17 +2714,13 @@ MalType* mal_conj(list args) {
     return make_error_fmt("'conj': first argument is not a list or vector: '%s'\n", \
                           pr_str(lst, UNREADABLY));
   }
-
   list rest = args->next;
-
   if (is_list(lst)) {
-
     list new_lst = list_reverse(list_copy(lst->value.mal_list));
-
     while(rest) {
       new_lst = list_push(new_lst, rest->data);
       rest = rest->next;
-  }
+    }
     return make_list(new_lst);
   }
   else /* is_vector(lst) */ {
