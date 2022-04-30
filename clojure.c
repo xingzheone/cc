@@ -541,8 +541,8 @@ void reader_print(Reader* reader) {
   /* NOTE: needed for debugging the reader only */
 
   Token* tok;
-  
-  for (long i = 0; i < reader->token_count; i++) {
+  //需要-1 不然报 Segmentation Fault
+  for (long i = 0; i < reader->token_count-1; i++) {
 
     tok =  reader_next(reader);
 
@@ -578,9 +578,11 @@ void reader_print(Reader* reader) {
       printf("nil: %s", tok->data);
       break;
     }
+    printf("\n");
     /* print an error for any tokens with an error string */
     tok->error ? printf(" - %s", tok->error) : 0;
   }
+  reader->position=0; //恢复
 }
 
 MalType* read_str(char* token_string) {
@@ -594,7 +596,7 @@ MalType* read_str(char* token_string) {
     return make_nil();
   }
   else {
-    // reader_print(reader);
+    reader_print(reader);
     return read_form(reader);
   }
 }
