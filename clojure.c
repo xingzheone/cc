@@ -539,13 +539,10 @@ Token* reader_next(Reader* reader) {
 
 void reader_print(Reader* reader) {
   /* NOTE: needed for debugging the reader only */
-
   Token* tok;
   //需要-1 不然报 Segmentation Fault
   for (long i = 0; i < reader->token_count-1; i++) {
-
     tok =  reader_next(reader);
-
     switch (tok->type) {
     case TOKEN_SPECIAL_CHARACTER:
       printf("special character: %s", tok->data);
@@ -586,9 +583,7 @@ void reader_print(Reader* reader) {
 }
 
 MalType* read_str(char* token_string) {
-
   Reader* reader = tokenize(token_string);
-
   if (reader->error) {
     return make_error_fmt("Reader error: %s", reader->error);
   }
@@ -600,17 +595,13 @@ MalType* read_str(char* token_string) {
     return read_form(reader);
   }
 }
-
+// 2022年4月30日 20点37分 
 Reader* tokenize(char* token_string) {
-
   /* allocate enough space for a Reader */
   /* TODO: over-allocates space */
   Reader* reader = reader_make(strlen(token_string));
-
   for (char* next = token_string; *next != '\0';) {
-
     Token* token = NULL;
-
     switch (*next) {
       /* skip whitespace */
     case ' ':
@@ -634,7 +625,6 @@ Reader* tokenize(char* token_string) {
     case '^':
       next = read_fixed_length_token(next, &token, 1);
       break;
-
       /* single or double character token */
     case '~':
       if ( *(next + 1) == '@' ) {
@@ -693,14 +683,12 @@ Reader* tokenize(char* token_string) {
       next = read_symbol_token(next, &token);
       break;
     }
-
     if (!token) {
       /* if no token was read (whitespace or comments)
          continue the loop */
       continue;
     }
     else {
-
       if (token->error) {
         /* report any errors with an early return */
         reader = reader_append(reader, token);
@@ -716,7 +704,6 @@ Reader* tokenize(char* token_string) {
 }
 
 char* read_fixed_length_token(char* current, Token** ptoken, int n) {
-
   *ptoken = token_allocate(current, n, TOKEN_SPECIAL_CHARACTER, NULL);
   return (current + n);
 }
@@ -757,7 +744,6 @@ char* read_symbol_token (char* current, Token** ptoken) {
 
 
 char* read_keyword_token (char* current, Token** ptoken) {
-
   /* TODO: check for invalid characters */
   return read_terminated_token(current + 1, ptoken, TOKEN_KEYWORD);
 }
@@ -2967,9 +2953,6 @@ char* get_fn(gptr data) {
 // end core.c
 
 //  printer.c
-
-
-
 char* pr_str(MalType* val, int readably) {
 
   if (!val) {
