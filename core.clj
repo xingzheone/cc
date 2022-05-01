@@ -5,3 +5,5 @@
     x
     ))
 )
+
+(prn "xingzhe: " (type-str (type '(a hao))))

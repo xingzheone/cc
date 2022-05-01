@@ -365,38 +365,31 @@ MalType* make_vector(list value) {
 }
 
 MalType* make_hashmap(list value) {
-
   MalType* mal_val = GC_MALLOC(sizeof(*mal_val));
   mal_val->type = MALTYPE_HASHMAP;
   mal_val->value.mal_list = value;
   mal_val->metadata = NULL;
-
   return mal_val;
 }
 
 MalType* make_atom(MalType* value) {
-
   MalType* mal_val = GC_MALLOC(sizeof(*mal_val));
   mal_val->type = MALTYPE_ATOM;
   mal_val->value.mal_atom = value;
   mal_val->metadata = NULL;
-
   return mal_val;
 }
 
 MalType* make_function(MalType*(*fn)(list args)) {
-
   MalType* mal_val = GC_MALLOC(sizeof(*mal_val));
   mal_val->type = MALTYPE_FUNCTION;
   mal_val->value.mal_function = fn;
   mal_val->is_macro = 0;
   mal_val->metadata = NULL;
-
   return mal_val;
 }
 
 MalType* make_closure(Env* env, MalType* parameters, MalType* definition, MalType* more_symbol) {
-
   MalType* mal_val = GC_MALLOC(sizeof(*mal_val));
   mal_val->type = MALTYPE_CLOSURE;
   mal_val->metadata = NULL;
@@ -426,7 +419,6 @@ inline MalType* make_nil() {
 }
 
 MalType* make_error(char* msg) {
-
   MalType* mal_string = GC_MALLOC(sizeof(*mal_string));
   mal_string->type = MALTYPE_STRING;
   mal_string->value.mal_string = msg;
@@ -435,12 +427,10 @@ MalType* make_error(char* msg) {
   mal_val->type = MALTYPE_ERROR;
   mal_val->value.mal_error = mal_string;
   mal_val->metadata = NULL;
-
   return mal_val;
 }
 
 MalType* make_error_fmt(char* fmt, ...) {
-
   va_list argptr;
   va_start(argptr, fmt);
 
@@ -774,6 +764,17 @@ char* read_number_token(char* current, Token** ptoken) {
     }
   }
   return next;
+}
+//实现字符串搜索
+char *ho_strpbrk(char *s1, char *s2) {
+    const char *s; 
+    for (; *s1; s1++) {
+        for (s = s2; *s; s++) {
+            if (*s == *s1)
+                return (char *)s1;
+        }   
+    }   
+    return NULL;
 }
 
 char* read_string_token(char* current, Token** ptoken) {
@@ -3330,23 +3331,19 @@ MalType* EVAL(MalType* ast, Env* env) {
       return make_error("too many arguments supplied to function");
     }
     else {
-
       /* TCE - modify ast and env directly and jump back to eval */
       env = env_make(closure->env, params, evlst->next, closure->more_symbol);
       ast = func->value.mal_closure->definition;
-
       if (is_error(ast)) { return ast; }
       goto TCE_entry_point;
     }
   }
   else {
-    return make_error_fmt("first item in list is not callable: '%s'",   \
-                          pr_str(func, UNREADABLY));
+    return make_error_fmt("first item in list is not callable: '%s'", pr_str(func, UNREADABLY));
   }
 }
 
 void PRINT(MalType* val) {
-
   char* output = pr_str(val, READABLY);
   printf("%s\n", output);
 }

@@ -4,6 +4,8 @@
         "cctype": "c",
         "clojure.h": "c",
         "gc.h": "c",
-        "readline.h": "c"
+        "readline.h": "c",
+        "iconv.h": "c",
+        "wchar.h": "c"
     }
 }
