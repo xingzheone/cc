@@ -1249,6 +1249,17 @@ MalType* mal_seq(list);
 MalType* mal_meta(list);
 MalType* mal_with_meta(list);
 
+// ns 
+
+MalType* get_type(list args) {
+ printf("ci: %p \n",args);
+ MalType* mt = args->data;
+//  printf("ci2: %d \n",val->type);
+//  printf("ci2: %s \n",val->value);
+// //  mal_prn(val);
+ return make_integer(mt->type);
+}
+
 /* only needed for ffi */
 #ifdef WITH_FFI
 MalType* mal_dot(list);
@@ -1259,6 +1270,8 @@ ns* ns_make_core() {
   ns* core = GC_MALLOC(sizeof(*core));
 
   hashmap core_functions = NULL;
+  /* extend */
+  core_functions = hashmap_put(core_functions,"type",get_type);
 
   /* arithmetic */
   core_functions = hashmap_put(core_functions, "+", mal_add);
@@ -3203,30 +3216,27 @@ MalType* READ(char* str) {
   return read_str(str);
 }
 
+/* forward references */
+MalType* eval_ast(MalType* ast, Env* env);
+MalType* eval_defbang(MalType* ast, Env** env);
+void eval_letstar(MalType** ast, Env** env);
+void eval_if(MalType** ast, Env** env);
+MalType* eval_fnstar(MalType* ast, Env* env);
+MalType* eval_do(MalType* ast, Env* env);
+MalType* eval_quote(MalType* ast);
+MalType* eval_quasiquote(MalType* ast);
+MalType* eval_quasiquoteexpand(MalType* ast);
+MalType* eval_defmacrobang(MalType*, Env** env);
+MalType* eval_macroexpand(MalType* ast, Env* env);
+MalType* macroexpand(MalType* ast, Env* env);
+void eval_try(MalType** ast, Env** env);
+
 MalType* EVAL(MalType* ast, Env* env) {
-
-  /* forward references */
-  MalType* eval_ast(MalType* ast, Env* env);
-  MalType* eval_defbang(MalType* ast, Env** env);
-  void eval_letstar(MalType** ast, Env** env);
-  void eval_if(MalType** ast, Env** env);
-  MalType* eval_fnstar(MalType* ast, Env* env);
-  MalType* eval_do(MalType* ast, Env* env);
-  MalType* eval_quote(MalType* ast);
-  MalType* eval_quasiquote(MalType* ast);
-  MalType* eval_quasiquoteexpand(MalType* ast);
-  MalType* eval_defmacrobang(MalType*, Env** env);
-  MalType* eval_macroexpand(MalType* ast, Env* env);
-  MalType* macroexpand(MalType* ast, Env* env);
-  void eval_try(MalType** ast, Env** env);
-
   /* Use goto to jump here rather than calling eval for tail-call elimination */
  TCE_entry_point:
-
-  /* NULL */
+ 
   if (!ast) { return make_nil(); }
 
-  /* macroexpansion */
   ast = macroexpand(ast, env);
   if (is_error(ast)) { return ast; }
 
@@ -3247,18 +3257,14 @@ MalType* EVAL(MalType* ast, Env* env) {
       return eval_defbang(ast, &env);
     }
     else if (strcmp(symbol, SYMBOL_LETSTAR) == 0) {
-
       /* TCE - modify ast and env directly and jump back to eval */
       eval_letstar(&ast, &env);
-
       if (is_error(ast)) { return ast; }
       goto TCE_entry_point;
     }
     else if (strcmp(symbol, SYMBOL_IF) == 0) {
-
       /* TCE - modify ast directly and jump back to eval */
       eval_if(&ast, &env);
-
       if (is_error(ast)) { return ast; }
       goto TCE_entry_point;
     }
@@ -3266,10 +3272,8 @@ MalType* EVAL(MalType* ast, Env* env) {
       return eval_fnstar(ast, env);
     }
     else if (strcmp(symbol, SYMBOL_DO) == 0) {
-
       /* TCE - modify ast and env directly and jump back to eval */
       ast = eval_do(ast, env);
-
       if (is_error(ast)) { return ast; }
       goto TCE_entry_point;
     }
@@ -3277,9 +3281,7 @@ MalType* EVAL(MalType* ast, Env* env) {
       return eval_quote(ast);
     }
     else if (strcmp(symbol, SYMBOL_QUASIQUOTE) == 0) {
-
       ast = eval_quasiquote(ast);
-
       if (is_error(ast)) { return ast; }
       goto TCE_entry_point;
     }
@@ -3295,10 +3297,8 @@ MalType* EVAL(MalType* ast, Env* env) {
       return eval_macroexpand(ast, env);
     }
     else if (strcmp(symbol, SYMBOL_TRYSTAR) == 0) {
-
       /* TCE - modify ast and env directly and jump back to eval */
       eval_try(&ast, &env);
-
       if (is_error(ast)) { return ast; }
       goto TCE_entry_point;
     }
@@ -4111,6 +4111,7 @@ int main(int argc, char** argv) {
   EVAL(READ("(def! load-file (fn* (f) (eval (read-string (str \"(do \" (slurp f) \"\nnil)\")))))"), repl_env);
   EVAL(READ("(defmacro! cond (fn* (& xs) (if (> (count xs) 0) (list 'if (first xs) (if (> (count xs) 1) (nth xs 1) (throw \"odd number of forms to cond\")) (cons 'cond (rest (rest xs)))))))"), repl_env);
 
+  EVAL(READ("(load-file \"core.clj\")"), repl_env);
   /* make command line arguments available in the environment */
   list lst = NULL;
   for (long i = 2; i < argc; i++) {
