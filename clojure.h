@@ -214,6 +214,7 @@ int is_macro(MalType *val);
 int is_macro_call(MalType * ast, Env * env);
 MalType *macroexpand(MalType * ast, Env * env);
 MalType *regularise_parameters(list * params, MalType * *more);
+MalType *quasiquote(MalType * ast);
 MalType *quasiquote_list(MalType * ast);
 MalType *quasiquote_vector(MalType * ast);
 

@@ -716,7 +716,7 @@ char *read_comment_token(char *current, Token **ptoken)
 
   return (current + token_chars + 1); /* next token starts with the char after the newline */
 }
-
+// read_form 的时候把 ` ' @ 等quote 规范成了(xxqutoe xxx)等标准的 list 形式. amtf
 MalType *read_form(Reader *reader) {
   if (reader->token_count > 0) {
     Token *tok = reader_peek(reader);
@@ -3363,89 +3363,55 @@ void eval_try(MalType **ast, Env **env);
 MalType *EVAL(MalType *ast, Env *env) {
   /* Use goto to jump here rather than calling eval for tail-call elimination */
 TCE_entry_point:
-  if (!ast) {
-    return make_nil();
-  }
+  if (!ast) { return make_nil(); }
 
   ast = macroexpand(ast, env);
-  if (is_error(ast))
-  {
-    return ast;
-  }
-
+  if (is_error(ast)) { return ast; }
   /* not a list */
-  if (!is_list(ast))
-  {
+  if (!is_list(ast)) {
     return eval_ast(ast, env);
   }
-
   /* empty list */
-  if (ast->value.mal_list == NULL)
-  {
-    return ast;
-  }
-
+  if (ast->value.mal_list == NULL) { return ast; }
   /* list */
   MalType *first = (ast->value.mal_list)->data;
   char *symbol = first->value.mal_symbol;
-
-  if (is_symbol(first))
-  {
-
+  if (is_symbol(first)) {
     /* handle special symbols first */
-    if (strcmp(symbol, SYMBOL_DEFBANG) == 0)
-    {
+    if (strcmp(symbol, SYMBOL_DEFBANG) == 0) {
       return eval_defbang(ast, &env);
-    }
-    else if (strcmp(symbol, SYMBOL_LETSTAR) == 0)
-    {
+    } else if (strcmp(symbol, SYMBOL_LETSTAR) == 0) {
       /* TCE - modify ast and env directly and jump back to eval */
       eval_letstar(&ast, &env);
-      if (is_error(ast))
-      {
+      if (is_error(ast)) {
         return ast;
       }
       goto TCE_entry_point;
-    }
-    else if (strcmp(symbol, SYMBOL_IF) == 0)
-    {
+    } else if (strcmp(symbol, SYMBOL_IF) == 0) {
       /* TCE - modify ast directly and jump back to eval */
       eval_if(&ast, &env);
-      if (is_error(ast))
-      {
+      if (is_error(ast)) {
         return ast;
       }
       goto TCE_entry_point;
-    }
-    else if (strcmp(symbol, SYMBOL_FNSTAR) == 0)
-    {
+    } else if (strcmp(symbol, SYMBOL_FNSTAR) == 0) {
       return eval_fnstar(ast, env);
-    }
-    else if (strcmp(symbol, SYMBOL_DO) == 0)
-    {
+    } else if (strcmp(symbol, SYMBOL_DO) == 0) {
       /* TCE - modify ast and env directly and jump back to eval */
       ast = eval_do(ast, env);
-      if (is_error(ast))
-      {
+      if (is_error(ast)) {
         return ast;
       }
       goto TCE_entry_point;
-    }
-    else if (strcmp(symbol, SYMBOL_QUOTE) == 0)
-    {
+    } else if (strcmp(symbol, SYMBOL_QUOTE) == 0) {
       return eval_quote(ast);
-    }
-    else if (strcmp(symbol, SYMBOL_QUASIQUOTE) == 0)
-    {
+    } else if (strcmp(symbol, SYMBOL_QUASIQUOTE) == 0) {
       ast = eval_quasiquote(ast);
-      if (is_error(ast))
-      {
+      if (is_error(ast)) {
         return ast;
       }
       goto TCE_entry_point;
-    }
-    else if (strcmp(symbol, SYMBOL_QUASIQUOTEEXPAND) == 0)
-    {
+    } else if (strcmp(symbol, SYMBOL_QUASIQUOTEEXPAND) == 0) {
 
       list lst = ast->value.mal_list;
       return eval_quasiquote(make_list(lst));
@@ -3738,8 +3704,6 @@ MalType *eval_quote(MalType *ast) {
 }
 
 MalType *eval_quasiquote(MalType *ast) {
-  /* forward reference */
-  MalType *quasiquote(MalType * ast);
   list lst = ast->value.mal_list;
   /* no arguments (quasiquote) */
   if (!lst->next) {
