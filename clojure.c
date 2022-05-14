@@ -873,9 +873,7 @@ MalType *read_atom(Reader *reader) {
 
 MalType *make_symbol_list(Reader *reader, char *symbol_name) {
   reader_next(reader);
-  list lst = NULL;
-  /* push the symbol and the following form onto the list */
-  lst = list_push(lst, make_symbol(symbol_name));
+  list lst = list_push(lst, make_symbol(symbol_name));   /* push the symbol and the following form onto the list */
   lst = list_push(lst, read_form(reader));
   return make_list(list_reverse(lst));
 }
