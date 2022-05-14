@@ -3751,12 +3751,12 @@ MalType *eval_quasiquote(MalType *ast) {
   }
   return quasiquote(lst->next->data);
 }
-
+/*
+https://clojure.org/reference/reader#syntax-quote
+syntax-quote (`, note the "backquote" character), Unquote (~) and Unquote-splicing (~@) quote (')
+*/
+//todo: change quasiquote to syntax-quote
 MalType *quasiquote(MalType *ast) {
-  /* forward references */
-  MalType *quasiquote_list(MalType * ast);
-  MalType *quasiquote_vector(MalType * ast);
-
   /* argument to quasiquote is self-evaluating: (quasiquote val) => val */
   if (is_self_evaluating(ast)) {
     return ast;
