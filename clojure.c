@@ -1,13 +1,11 @@
 
 #include "clojure.h"
 // list.c
-list list_make(gptr data_ptr)
-{
+list list_make(gptr data_ptr) {
   return list_push(NULL, data_ptr);
 }
 
-list list_push(list lst, gptr data_ptr)
-{
+list list_push(list lst, gptr data_ptr) {
   pair *new_head = GC_malloc(sizeof(pair));
   new_head->data = data_ptr;
   new_head->next = lst;
@@ -21,25 +19,20 @@ list list_push(list lst, gptr data_ptr)
 // list list_pop(list lst) {
 //   return (lst ? lst->next : NULL);
 // }
-
-long list_count(list lst)
-{
+long list_count(list lst) {
   /* handle empty case */
-  if (!lst)
-  {
+  if (!lst) {
     return 0;
   }
   long counter = 1;
-  while (lst->next)
-  {
+  while (lst->next) {
     counter++;
     lst = lst->next;
   }
   return counter;
 }
 
-list list_reverse(list lst)
-{
+list list_reverse(list lst) {
   /* list is not empty and has more than one element */
   if (lst && lst->next) {
     pair *prev = NULL, *next = NULL, *current = lst;
@@ -57,12 +50,10 @@ list list_reverse(list lst)
   return lst;
 }
 
-list list_concatenate(list lst1, list lst2)
-{
+list list_concatenate(list lst1, list lst2) {
   list new_lst = NULL;
   list iterator = NULL;
-  while (lst2)
-  {
+  while (lst2) {
     gptr val = lst2->data;
     new_lst = list_push(new_lst, val);
     lst2 = lst2->next;
@@ -70,8 +61,7 @@ list list_concatenate(list lst1, list lst2)
   new_lst = list_reverse(new_lst);
   lst1 = list_reverse(lst1);
   iterator = lst1;
-  while (iterator)
-  {
+  while (iterator) {
     gptr val = iterator->data;
     new_lst = list_push(new_lst, val);
     iterator = iterator->next;
@@ -80,13 +70,10 @@ list list_concatenate(list lst1, list lst2)
   return new_lst;
 }
 
-gptr list_nth(list lst, int n)
-{
+gptr list_nth(list lst, int n) {
   int idx = 0;
-  while (lst)
-  {
-    if (n == idx)
-    {
+  while (lst) {
+    if (n == idx) {
       return lst->data;
     }
     idx++;
@@ -95,66 +82,46 @@ gptr list_nth(list lst, int n)
   return NULL;
 }
 
-gptr list_first(list lst)
-{
-  if (lst)
-  {
+gptr list_first(list lst) {
+  if (lst) {
     return lst->data;
-  }
-  else
-  {
+  } else {
     return NULL;
   }
 }
 
-list list_rest(list lst)
-{
-
-  if (lst)
-  {
+list list_rest(list lst) {
+  if (lst) {
     return lst->next;
-  }
-  else
-  {
+  } else {
     return NULL;
   }
 }
 
-list list_copy(list lst)
-{
-  if (!lst)
-  {
+list list_copy(list lst) {
+  if (!lst) {
     return NULL;
   }
   list new_lst = NULL;
-  while (lst)
-  {
-
+  while (lst) {
     new_lst = list_push(new_lst, lst->data);
     lst = lst->next;
   }
   return new_lst;
 }
 //传入查询函数 查询
-long list_findf(list lst, char *keystring, char *(*fn)(gptr))
-{
+long list_findf(list lst, char *keystring, char *(*fn)(gptr)) {
   /* handle empty case */
-  if (!lst)
-  {
+  if (!lst) {
     return -1;
   }
-
   list current = lst;
-  while (current)
-  {
+  while (current) {
     /* apply fn to the data to get a string */
     char *item = fn(current->data);
-    if (strcmp(keystring, item) == 0)
-    {
+    if (strcmp(keystring, item) == 0) {
       return (current - lst); /* return the index of the first match */
-    }
-    else
-    {
+    } else {
       current = current->next; /* skip the next item in the list to*/
     }
   }
@@ -168,53 +135,41 @@ long list_findf(list lst, char *keystring, char *(*fn)(gptr))
 //   return map;
 // }
 
-hashmap hashmap_put(hashmap map, char *keystring, gptr data_ptr)
-{
+hashmap hashmap_put(hashmap map, char *keystring, gptr data_ptr) {
   map = list_push(map, data_ptr);
   map = list_push(map, keystring);
   return map;
 }
 
-gptr hashmap_get(hashmap map, char *keystring)
-{
+gptr hashmap_get(hashmap map, char *keystring) {
   /* handle empty case */
-  if (!map)
-  {
+  if (!map) {
     return NULL;
   }
   list lst = map;
-  while (lst)
-  {
-    if (strcmp(keystring, (char *)lst->data) == 0)
-    {
+  while (lst) {
+    if (strcmp(keystring, (char *)lst->data) == 0) {
       return (lst->next)->data; /* return next item in list which is the value */
-    }
-    else
-    {
+    } else {
       lst = (lst->next)->next; /* skip the next item in the list to get to the next key */
     }
   }
   return NULL; /* not found */
 }
 
-gptr hashmap_getf(hashmap map, char *keystring, char *(*fn)(gptr))
-{
+gptr hashmap_getf(hashmap map, char *keystring, char *(*fn)(gptr)) {
   /* handle empty case */
-  if (!map)
-  {
+  if (!map) {
     return NULL;
   }
   list lst = map;
-  while (lst)
-  {
+  while (lst) {
     /* apply fn to the data to get a string */
     char *item = fn(lst->data);
-    if (strcmp(keystring, item) == 0)
-    {
+    if (strcmp(keystring, item) == 0) {
       return (lst->next)->data; /* return next item in list which is the value */
     }
-    else
-    {
+    else {
       lst = (lst->next)->next; /* skip the next item in the list to get to the next key */
     }
   }
@@ -547,82 +502,56 @@ MalType *read_str(char *token_string) {
   }
 }
 // 2022年4月30日 20点37分
-/* allocate enough space for a Reader */
+/* allocate enough space for a Reader 
+TODO: over-allocates space 
+*/
 Reader *tokenize(char *token_string) {
-  /* TODO: over-allocates space */
   Reader *reader = reader_make(strlen(token_string));
   for (char *next = token_string; *next != '\0';) {
     Token *token = NULL;
+    //下面的break 注意是 switch 内的.不是for 的.
     switch (*next) {
-      /* skip whitespace */
-    case ' ':
-    case ',':
+    case ' ': case ',':  /* skip whitespace */
     case 0x0A: /* newline */
       next++;
       token = NULL; /* no token for whitespace */
       break;
       /* single character token */
-    case '[':
-    case '\\':
-    case ']':
-    case '{':
-    case '}':
-    case '(':
-    case ')':
-    case '\'':
-    case '@':
-    case '`':
+    case '[': case '\\': case ']': case '{': case '}':
+    case '(': case ')': case '\'': case '@': case '`':
     case '^':
       next = read_fixed_length_token(next, &token, 1);
       break;
       /* single or double character token */
     case '~':
-      if (*(next + 1) == '@')
-      {
+      if (*(next + 1) == '@') {
         next = read_fixed_length_token(next, &token, 2);
-      }
-      else
-      {
+      } else {
         next = read_fixed_length_token(next, &token, 1);
       }
       break;
-
       /* read string of characters within double quotes */
     case '"':
       next = read_string_token(next, &token);
       break;
-
       /* read a comment - all remaining input until newline */
     case ';':
       next = read_comment_token(next, &token);
       token = NULL; /* skip token for comments */
       break;
-
       /* read an integer */
-    case '0':
-    case '1':
-    case '2':
-    case '3':
-    case '4':
-    case '5':
-    case '6':
-    case '7':
-    case '8':
-    case '9':
+    case '0': case '1': case '2': case '3': case '4':
+    case '5': case '6': case '7': case '8': case '9':
       next = read_number_token(next, &token);
       //      next = read_integer_token(next, &token);
       break;
-
       /* integer may be prefixed with +/- */
     case '+':
     case '-':
-      if (isdigit(next[1]))
-      {
+      if (isdigit(next[1])) {
         next = read_number_token(next, &token);
         //      next = read_integer_token(next, &token);
-      }
-      else
-      { /* if not digits it is part of a symbol */
+      } else { /* if not digits it is part of a symbol */
         next = read_symbol_token(next, &token);
       }
       break;
@@ -631,22 +560,16 @@ Reader *tokenize(char *token_string) {
     case ':':
       next = read_keyword_token(next, &token);
       break;
-
       /* read anything else as a symbol */
     default:
       next = read_symbol_token(next, &token);
       break;
     }
-    if (!token)
-    {
-      /* if no token was read (whitespace or comments)
-         continue the loop */
+    if (!token) {
+      /* if no token was read (whitespace or comments) continue the loop */
       continue;
-    }
-    else
-    {
-      if (token->error)
-      {
+    } else {
+      if (token->error) {
         /* report any errors with an early return */
         reader = reader_append(reader, token);
         reader->error = token->error;
@@ -690,38 +613,28 @@ char *read_symbol_token(char *current, Token **ptoken) {
   return next;
 }
 
-char *read_keyword_token(char *current, Token **ptoken)
-{
+char *read_keyword_token(char *current, Token **ptoken) {
   /* TODO: check for invalid characters */
   return read_terminated_token(current + 1, ptoken, TOKEN_KEYWORD);
 }
 
-char *read_number_token(char *current, Token **ptoken)
-{
-
+char *read_number_token(char *current, Token **ptoken) {
   int has_decimal_point = 0;
-
   char *next = read_terminated_token(current, ptoken, TOKEN_INTEGER);
   long token_length = next - current;
 
   /* first char is either digit or '+' or '-'
      check the rest consists of valid characters */
-  for (long i = 1; i < token_length; i++)
-  {
+  for (long i = 1; i < token_length; i++) {
 
-    if ((*ptoken)->data[i] == '.' && has_decimal_point)
-    {
+    if ((*ptoken)->data[i] == '.' && has_decimal_point) {
       (*ptoken)->error = "Invalid character reading number";
       break;
-    }
-    else if ((*ptoken)->data[i] == '.' && !has_decimal_point)
-    {
+    } else if ((*ptoken)->data[i] == '.' && !has_decimal_point) {
       has_decimal_point = 1;
       (*ptoken)->type = TOKEN_FLOAT;
       break;
-    }
-    else if (!(isdigit((*ptoken)->data[i])))
-    {
+    } else if (!(isdigit((*ptoken)->data[i]))) {
       (*ptoken)->error = "Invalid character reading number";
       break;
     }
@@ -729,13 +642,10 @@ char *read_number_token(char *current, Token **ptoken)
   return next;
 }
 //实现字符串搜索
-char *ho_strpbrk(char *s1, char *s2)
-{
+char *ho_strpbrk(char *s1, char *s2) {
   const char *s;
-  for (; *s1; s1++)
-  {
-    for (s = s2; *s; s++)
-    {
+  for (; *s1; s1++) {
+    for (s = s2; *s; s++) {
       if (*s == *s1)
         return (char *)s1;
     }
@@ -743,21 +653,18 @@ char *ho_strpbrk(char *s1, char *s2)
   return NULL;
 }
 
-char *read_string_token(char *current, Token **ptoken)
-{
+char *read_string_token(char *current, Token **ptoken) {
 
   char *start, *end, *error = NULL;
   long token_length = 0;
 
   start = current + 1;
 
-  while (1)
-  {
+  while (1) {
     end = strchr(start, '"'); /* find the next " character */
 
     /* handle failure to find closing quotes - implies end of input has been reached */
-    if (!end)
-    {
+    if (!end) {
       end = current + strlen(current);
       token_length = strlen(current);
 
@@ -766,30 +673,25 @@ char *read_string_token(char *current, Token **ptoken)
     }
     /* if the character preceding the " is a '\' character (escape), need to check if it is escaping the " and if it
        is then keep searching from the next character */
-    else if (*(end - 1) == '\\')
-    {
+    else if (*(end - 1) == '\\') {
 
       char *back_ptr = end - 1;
-      while (*back_ptr == '\\')
-      {
+      while (*back_ptr == '\\') {
         back_ptr--; /* back up to count the escape characters '\' */
       }
 
       long escape_chars = (end - 1) - back_ptr;
 
-      if (escape_chars % 2 == 1)
-      {                  /* odd number of '\' chars means " is not quoted */
+      if (escape_chars % 2 == 1) {                 
+         /* odd number of '\' chars means " is not quoted */
         start = end + 1; /* so keep searching */
-      }
-      else
-      {
+      } else {
         /* even number of '\' characters means we found the terminating quote mark */
         token_length = (end - current - 1); /* quotes are excluded from string token */
         break;
       }
     }
-    else
-    {
+    else {
       token_length = (end - current - 1); /* quotes are excluded from string token */
       break;
     }
@@ -804,7 +706,6 @@ char *read_string_token(char *current, Token **ptoken)
 char *read_comment_token(char *current, Token **ptoken)
 {
   /* comment includes all remaining characters to the next newline */
-
   /* search for newline character */
   char *end = strchr(current, 0x0A);
 
@@ -816,18 +717,11 @@ char *read_comment_token(char *current, Token **ptoken)
   return (current + token_chars + 1); /* next token starts with the char after the newline */
 }
 
-MalType *read_form(Reader *reader)
-{
-
-  if (reader->token_count > 0)
-  {
-
+MalType *read_form(Reader *reader) {
+  if (reader->token_count > 0) {
     Token *tok = reader_peek(reader);
-    if (tok->type == TOKEN_SPECIAL_CHARACTER)
-    {
-
-      switch (tok->data[0])
-      {
+    if (tok->type == TOKEN_SPECIAL_CHARACTER) {
+      switch (tok->data[0]) {
 
       case '(':
         return read_list(reader);
@@ -852,13 +746,10 @@ MalType *read_form(Reader *reader)
         break;
 
       case '~':
-        if (tok->data[1] == '@')
-        {
+        if (tok->data[1] == '@') {
           /* create and return a MalType list (splice-unquote read_form) */
           return make_symbol_list(reader, SYMBOL_SPLICE_UNQUOTE);
-        }
-        else
-        {
+        } else {
           /* create and return a MalType list (unquote read_form) */
           return make_symbol_list(reader, SYMBOL_UNQUOTE);
         }
@@ -988,50 +879,36 @@ MalType *read_matched_delimiters(Reader *reader, char start_delimiter, char end_
   }
 }
 
-MalType *read_atom(Reader *reader)
-{
-
+MalType *read_atom(Reader *reader) {
   Token *tok = reader_next(reader);
-
-  switch (tok->type)
-  {
-
+  switch (tok->type) {
   case TOKEN_SPECIAL_CHARACTER:
     return make_symbol(tok->data);
     break;
-
   case TOKEN_COMMENT:
     return make_error("Error: comment found in token strea");
     break;
-
   case TOKEN_STRING:
     return make_string(tok->data);
     break;
-
   case TOKEN_INTEGER:
     return make_integer(strtol(tok->data, NULL, 10));
     break;
-
   case TOKEN_FLOAT:
     return make_float(atof(tok->data));
     break;
-
   case TOKEN_SYMBOL:
     return make_symbol(tok->data);
     break;
-
   case TOKEN_KEYWORD:
     return make_keyword(tok->data);
     break;
-
   case TOKEN_TRUE:
     return make_true();
     break;
-
   case TOKEN_FALSE:
     return make_false();
     break;
-
   case TOKEN_NIL:
     return make_nil();
     break;
@@ -1039,16 +916,12 @@ MalType *read_atom(Reader *reader)
   return make_error("Reader error: Unknown atom type");
 }
 
-MalType *make_symbol_list(Reader *reader, char *symbol_name)
-{
-
+MalType *make_symbol_list(Reader *reader, char *symbol_name) {
   reader_next(reader);
   list lst = NULL;
-
   /* push the symbol and the following form onto the list */
   lst = list_push(lst, make_symbol(symbol_name));
   lst = list_push(lst, read_form(reader));
-
   return make_list(list_reverse(lst));
 }
 
@@ -1077,32 +950,25 @@ char *unescape_string(char *str, long length) {
         dest[j++] = '"';
         i++; /* skip extra char */
         break;
-
         /* replace '\n' with newline 0x0A */
       case 'n':
         dest[j++] = 0x0A;
         i++; /* skip extra char */
         break;
-
         /* replace '\\' with '\' */
       case '\\':
         dest[j++] = '\\';
         i++; /* skip extra char */
         break;
-
       default:
         /* just a '\' symbol so copy it */
         dest[j++] = '\\';
       }
-    }
-    /* not a quote so copy it */
-    else
-    {
+    } else {  /* not a quote so copy it */
       dest[j++] = str[i];
     }
   }
   dest[j] = '\0';
-
   return dest;
 }
 
@@ -1110,52 +976,37 @@ char *unescape_string(char *str, long length) {
 
 // env.c
 /* Note: caller must make sure enough exprs to match symbols */
-Env *env_make(Env *outer, list symbol_list, list exprs_list, MalType *more_symbol)
-{
+Env *env_make(Env *outer, list symbol_list, list exprs_list, MalType *more_symbol) {
 
   Env *env = GC_MALLOC(sizeof(*env));
   env->outer = outer;
   env->data = NULL;
 
-  while (symbol_list)
-  {
-
+  while (symbol_list) {
     env = env_set(env, symbol_list->data, exprs_list->data);
-
     symbol_list = symbol_list->next;
     exprs_list = exprs_list->next;
   }
 
   /* set the 'more' symbol if there is one */
-  if (more_symbol)
-  {
+  if (more_symbol) {
     env = env_set(env, more_symbol, make_list(exprs_list));
   }
   return env;
 }
 
-Env *env_set(Env *current, MalType *symbol, MalType *value)
-{
-
+Env *env_set(Env *current, MalType *symbol, MalType *value) {
   current->data = hashmap_put(current->data, symbol->value.mal_symbol, value);
   return current;
 }
 
-Env *env_find(Env *current, MalType *symbol)
-{
-
+Env *env_find(Env *current, MalType *symbol) {
   MalType *val = hashmap_get(current->data, symbol->value.mal_symbol);
-
-  if (val)
-  {
+  if (val) {
     return current;
-  }
-  else if (current->outer)
-  {
+  } else if (current->outer) {
     return env_find(current->outer, symbol);
-  }
-  else
-  {
+  } else {
     return NULL; /* not found */
   }
 }
@@ -1175,15 +1026,12 @@ MalType *env_get(Env *current, MalType *symbol)
   }
 }
 
-Env *env_set_C_fn(Env *current, char *symbol_name, MalType *(*fn)(list))
-{
-
+Env *env_set_C_fn(Env *current, char *symbol_name, MalType *(*fn)(list)) {
   return env_set(current, make_symbol(symbol_name), make_function(fn));
 }
 // end env.c
 
 // core.c
-
 /* forward references to main file */
 MalType *apply(MalType *fn, list args);
 
@@ -1259,13 +1107,12 @@ MalType *mal_with_meta(list);
 
 // ns
 
-MalType *get_type(list args)
-{
-  printf("ci: %p \n", args);
-  MalType *mt = args->data;
+MalType *get_type(list node) {
+  printf("ci: %p \n", node);
+  MalType *mt = node->data;
   //  printf("ci2: %d \n",val->type);
   //  printf("ci2: %s \n",val->value);
-  // //  mal_prn(val);
+  //  mal_prn(val);
   return make_integer(mt->type);
 }
 
@@ -1274,9 +1121,7 @@ MalType *get_type(list args)
 MalType *mal_dot(list);
 #endif
 
-ns *ns_make_core()
-{
-
+ns *ns_make_core() {
   ns *core = GC_MALLOC(sizeof(*core));
 
   hashmap core_functions = NULL;
@@ -1374,35 +1219,24 @@ ns *ns_make_core()
 
 /* core function definitons */
 
-MalType *mal_add(list args)
-{
+MalType *mal_add(list args) {
   /* Accepts any number of arguments */
-
   int return_float = 0;
-
   long i_sum = 0;
   double r_sum = 0.0;
 
-  while (args)
-  {
-
+  while (args) {
     MalType *val = args->data;
-    if (!is_number(val))
-    {
+    if (!is_number(val)) {
       return make_error("'+': expected numerical arguments");
     }
 
-    if (is_integer(val) && !return_float)
-    {
+    if (is_integer(val) && !return_float) {
       i_sum = i_sum + val->value.mal_integer;
-    }
-    else if (is_integer(val))
-    {
+    } else if (is_integer(val)) {
       r_sum = (double)i_sum + r_sum + val->value.mal_integer;
       i_sum = 0;
-    }
-    else
-    {
+    } else {
       r_sum = (double)i_sum + r_sum + val->value.mal_float;
       i_sum = 0;
       return_float = 1;
@@ -1410,67 +1244,44 @@ MalType *mal_add(list args)
     args = args->next;
   }
 
-  if (return_float)
-  {
+  if (return_float) {
     return make_float(r_sum);
-  }
-  else
-  {
+  } else {
     return make_integer(i_sum);
   }
 }
 
-MalType *mal_sub(list args)
-{
+MalType *mal_sub(list args) {
   /* Accepts any number of arguments */
-
   int return_float = 0;
-
   long i_sum = 0;
   double r_sum = 0.0;
-
-  if (args)
-  {
-
+  if (args) {
     MalType *val = args->data;
     args = args->next;
-
-    if (!is_number(val))
-    {
+    if (!is_number(val)) {
       return make_error_fmt("'-': expected numerical arguments");
     }
-
-    if (is_integer(val))
-    {
+    if (is_integer(val)) {
       i_sum = val->value.mal_integer;
-    }
-    else
-    {
+    } else {
       r_sum = val->value.mal_float;
       return_float = 1;
     }
 
-    while (args)
-    {
-
+    while (args) {
       val = args->data;
-
-      if (!is_number(val))
-      {
+      if (!is_number(val)) {
         return make_error_fmt("'-': expected numerical arguments");
       }
 
-      if (is_integer(val) && !return_float)
-      {
+      if (is_integer(val) && !return_float) {
         i_sum = i_sum - val->value.mal_integer;
       }
-      else if (is_integer(val))
-      {
+      else if (is_integer(val)) {
         r_sum = (double)i_sum + r_sum - (double)val->value.mal_integer;
         i_sum = 0;
-      }
-      else
-      {
+      } else {
         r_sum = (double)i_sum + r_sum - val->value.mal_float;
         i_sum = 0;
         return_float = 1;
@@ -1479,12 +1290,9 @@ MalType *mal_sub(list args)
     }
   }
 
-  if (return_float)
-  {
+  if (return_float) {
     return make_float(r_sum);
-  }
-  else
-  {
+  } else {
     return make_integer(i_sum);
   }
 }
@@ -4639,24 +4447,18 @@ int is_macro_call(MalType *ast, Env *env)
   }
 }
 
-int main(int argc, char **argv)
-{
-
+int main(int argc, char **argv) {
   Env *repl_env = env_make(NULL, NULL, NULL, NULL);
   global_env = repl_env;
 
-  ns *core = ns_make_core();
-  hashmap mappings = core->mappings;
+  ns *core_ns = ns_make_core();
+  hashmap mappings = core_ns->mappings;
 
-  while (mappings)
-  {
+  while (mappings) {
     char *symbol = mappings->data;
     MalType *(*function)(list) = mappings->next->data;
-
     env_set_C_fn(repl_env, symbol, function);
-
-    /* pop symbol and function from hashmap/list */
-    mappings = mappings->next->next;
+    mappings = mappings->next->next;    /* pop symbol and function from hashmap/list */
   }
 
   env_set_C_fn(repl_env, "eval", mal_eval);
