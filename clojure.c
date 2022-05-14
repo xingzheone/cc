@@ -3122,45 +3122,26 @@ char *get_fn(gptr data)
 // end core.c
 
 //  printer.c
-char *pr_str(MalType *val, int readably)
-{
+char *pr_str(MalType *val, int readably) {
+  if (!val) return "";
 
-  if (!val)
-  {
-    return "";
-  }
-
-  switch (val->type)
-  {
-
+  switch (val->type) {
   case MALTYPE_SYMBOL:
-
     return snprintfbuf(SYMBOL_BUFFER_SIZE, "%s", val->value.mal_symbol);
     break;
-
   case MALTYPE_KEYWORD:
-
     return snprintfbuf(SYMBOL_BUFFER_SIZE, ":%s", val->value.mal_keyword);
     break;
-
   case MALTYPE_INTEGER:
-
     return snprintfbuf(SYMBOL_BUFFER_SIZE, "%ld", val->value.mal_integer);
     break;
-
   case MALTYPE_FLOAT:
-
     return snprintfbuf(SYMBOL_BUFFER_SIZE, "%lf", val->value.mal_float);
     break;
-
   case MALTYPE_STRING:
-
-    if (readably)
-    {
+    if (readably) {
       return snprintfbuf(STRING_BUFFER_SIZE, "%s", escape_string(val->value.mal_string));
-    }
-    else
-    {
+    } else {
       return snprintfbuf(STRING_BUFFER_SIZE, "%s", val->value.mal_string);
     }
     break;
@@ -3306,88 +3287,61 @@ char *pr_str_list(list lst, int readably, char *start_delimiter, char *end_delim
   return list_buffer;
 }
 
-char *escape_string(char *str)
-{
-
+// 转义 
+char *escape_string(char *str) {
   long buffer_length = 2 * (strlen(str) + 1); /* allocate a reasonable initial buffer size */
   char *buffer = GC_MALLOC(sizeof(*buffer) * buffer_length);
-
   strcpy(buffer, "\"");
-
   char *curr = str;
-  while (*curr != '\0')
-  {
-
-    switch (*curr)
-    {
-
+  while (*curr != '\0') {
+    switch (*curr) {
     case '"':
       strcat(buffer, "\\\"");
       break;
-
     case '\\':
       strcat(buffer, "\\\\");
       break;
-
     case 0x0A:
       strcat(buffer, "\\n");
       break;
-
     default:
       strncat(buffer, curr, 1);
     }
     curr++;
-
     /* check for overflow and increase buffer size */
-    if ((curr - str) >= buffer_length)
-    {
+    if ((curr - str) >= buffer_length) {
       buffer_length *= 2;
       buffer = GC_REALLOC(buffer, sizeof(*buffer) * buffer_length);
     }
   }
-
   strcat(buffer, "\"");
-
   /* trim the buffer to the size of the actual escaped string */
   buffer_length = strlen(buffer);
   buffer = GC_REALLOC(buffer, sizeof(*buffer) * buffer_length + 1);
-
   return buffer;
 }
 
-char *snprintfbuf(long initial_size, char *fmt, ...)
-{
-  /* this is just a wrapper for the *printf family that ensures the
-     string is long enough to hold the contents */
-
+char *snprintfbuf(long initial_size, char *fmt, ...) {
+  /* this is just a wrapper for the *printf family that ensures the string is long enough to hold the contents */
   va_list argptr;
   va_start(argptr, fmt);
-
   char *buffer = GC_MALLOC(sizeof(*buffer) * initial_size);
   long n = vsnprintf(buffer, initial_size, fmt, argptr);
   va_end(argptr);
-
-  if (n > initial_size)
-  {
+  if (n > initial_size) {
     va_start(argptr, fmt);
-
     buffer = GC_REALLOC(buffer, sizeof(*buffer) * n);
     vsnprintf(buffer, n, fmt, argptr);
-
     va_end(argptr);
   }
   return buffer;
 }
-
 // end printer.c
 
 //  hashmap.c
 // end hashmap.c
-
 // a_mal.c
-MalType *READ(char *str)
-{
-
+MalType *READ(char *str) {
   return read_str(str);
 }
 
@@ -3584,25 +3538,20 @@ void rep(char *str, Env *env)
 /* declare as global so it can be accessed by mal_eval */
 Env *global_env;
 
-MalType *mal_eval(list args)
-{
+MalType *mal_eval(list args) {
   MalType *ast = args->data;
   return EVAL(ast, global_env);
 }
 
-MalType *mal_readline(list args)
-{
-  if (!args || args->next)
-  {
+MalType *mal_readline(list args) {
+  if (!args || args->next) {
     return make_error("'readline': expected exactly one argument");
   }
 
   MalType *prompt = args->data;
 
-  if (!is_string(prompt))
-  {
-    return make_error_fmt("'readline': argument is not a string '%s'",
-                          pr_str(prompt, UNREADABLY));
+  if (!is_string(prompt)) {
+    return make_error_fmt("'readline': argument is not a string '%s'", pr_str(prompt, UNREADABLY));
   }
 
   char *str = readline(prompt->value.mal_string);
@@ -4412,37 +4361,23 @@ MalType *apply(MalType *fn, list args)
   }
 }
 
-int is_macro_call(MalType *ast, Env *env)
-{
-
+int is_macro_call(MalType *ast, Env *env) {
   /* not a list */
-  if (!is_list(ast))
-  {
-    return 0;
-  }
-
+  if (!is_list(ast)) return 0;
   /* empty list */
   list lst = ast->value.mal_list;
-  if (!lst)
-  {
-    return 0;
-  }
+  if (!lst) return 0;
 
   /* first item not a symbol */
   MalType *first = lst->data;
-  if (!is_symbol(first))
-  {
+  if (!is_symbol(first)) {
     return 0;
   }
-
   /* lookup symbol */
   MalType *val = env_get(env, first);
-  if (is_error(val))
-  {
+  if (is_error(val)) {
     return 0;
-  }
-  else
-  {
+  } else {
     return (val->is_macro);
   }
 }
@@ -4472,48 +4407,35 @@ int main(int argc, char **argv) {
   EVAL(READ("(load-file \"core.clj\")"), repl_env);
   /* make command line arguments available in the environment */
   list lst = NULL;
-  for (long i = 2; i < argc; i++)
-  {
+  for (long i = 2; i < argc; i++) {
     lst = list_push(lst, make_string(argv[i]));
   }
   env_set(repl_env, make_symbol("*ARGV*"), make_list(list_reverse(lst)));
   env_set(repl_env, make_symbol("*host-language*"), make_string("c.2"));
 
   /* run in script mode if a filename is given */
-  if (argc > 1)
-  {
-
+  if (argc > 1) {
     /* first argument on command line is filename */
     char *load_command = snprintfbuf(1024, "(load-file \"%s\")", argv[1]);
     EVAL(READ(load_command), repl_env);
-  }
-  /* run in repl mode when no cmd line args */
-  else
-  {
-
+  } else {
+    /* run in repl mode when no cmd line args */
     /* Greeting message */
     EVAL(READ("(println (str \"Mal [\" *host-language* \"]\"))"), repl_env);
 
-    while (1)
-    {
-
+    while (1) {
       /* print prompt and get input*/
       /* readline allocates memory for input */
       char *input = readline(PROMPT_STRING);
-
       /* Check for EOF (Ctrl-D) */
-      if (!input)
-      {
+      if (!input) {
         printf("\n");
         return 0;
       }
-
       /* add input to history */
       add_history(input);
-
       /* call Read-Eval-Print */
       rep(input, repl_env);
-
       /* have to release the memory used by readline */
       free(input);
     }
