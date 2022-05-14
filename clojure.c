@@ -703,17 +703,13 @@ char *read_string_token(char *current, Token **ptoken) {
   return (end + 1);
 }
 
-char *read_comment_token(char *current, Token **ptoken)
-{
+char *read_comment_token(char *current, Token **ptoken) {
   /* comment includes all remaining characters to the next newline */
   /* search for newline character */
   char *end = strchr(current, 0x0A);
-
   /* if newline is not found it implies the end of string is reached */
   long token_chars = !end ? strlen(current) : (end - current);
-
   *ptoken = token_allocate(current, token_chars, TOKEN_COMMENT, NULL);
-
   return (current + token_chars + 1); /* next token starts with the char after the newline */
 }
 // read_form 的时候把 ` ' @ 等quote 规范成了(xxqutoe xxx)等标准的 list 形式. amtf
@@ -722,29 +718,23 @@ MalType *read_form(Reader *reader) {
     Token *tok = reader_peek(reader);
     if (tok->type == TOKEN_SPECIAL_CHARACTER) {
       switch (tok->data[0]) {
-
       case '(':
         return read_list(reader);
         break;
-
       case '[':
         return read_vector(reader);
         break;
-
       case '{':
         return read_hashmap(reader);
         break;
-
       case '\'':
         /* create and return a MalType list (quote read_form) */
         return make_symbol_list(reader, SYMBOL_QUOTE);
         break;
-
       case '`':
         /* create and return a MalType list (quasiquote read_form) */
         return make_symbol_list(reader, SYMBOL_QUASIQUOTE);
         break;
-
       case '~':
         if (tok->data[1] == '@') {
           /* create and return a MalType list (splice-unquote read_form) */
@@ -756,119 +746,84 @@ MalType *read_form(Reader *reader) {
       case '@':
         /* create and return a MalType list (deref read_form) */
         return make_symbol_list(reader, SYMBOL_DEREF);
-
       case '^':
         /* create and return a MalType list (with-meta <second-form> <first-form>
            where first form should ne a metadata map and second form is somethingh
            that can have metadata attached */
         reader_next(reader);
-
         /* grab the components of the list */
         MalType *symbol = make_symbol(SYMBOL_WITH_META);
         MalType *first_form = read_form(reader);
         MalType *second_form = read_form(reader);
-
         /* push the symbol and the following forms onto a list */
         list lst = NULL;
         lst = list_push(lst, symbol);
         lst = list_push(lst, second_form);
         lst = list_push(lst, first_form);
         lst = list_reverse(lst);
-
         return make_list(lst);
-
       default:
         /* shouldn't happen */
         return make_error_fmt("Reader error: Unknown special character '%c'", tok->data[0]);
       }
-    }
-    else
-    { /* Not a special character */
+    } else { /* Not a special character */
       return read_atom(reader);
     }
-  }
-  else
-  { /* no tokens */
+  } else { /* no tokens */
     return NULL;
   }
 }
 
-MalType *read_list(Reader *reader)
-{
-
+MalType *read_list(Reader *reader) {
   MalType *retval = read_matched_delimiters(reader, '(', ')');
-
-  if (is_error(retval))
-  {
+  if (is_error(retval)) {
     retval = make_error("Reader error: unbalanced parenthesis '()'");
-  }
-  else
-  {
+  } else {
     retval->type = MALTYPE_LIST;
   }
   return retval;
 }
 
-MalType *read_vector(Reader *reader)
-{
-
+MalType *read_vector(Reader *reader) {
   MalType *retval = read_matched_delimiters(reader, '[', ']');
-
-  if (is_error(retval))
-  {
+  if (is_error(retval)) {
     retval = make_error("Reader error: unbalanced brackets '[]'");
-  }
-  else
-  {
+  } else {
     retval->type = MALTYPE_VECTOR;
   }
   return retval;
 }
 
-MalType *read_hashmap(Reader *reader)
-{
-
+MalType *read_hashmap(Reader *reader) {
   MalType *retval = read_matched_delimiters(reader, '{', '}');
-
-  if (is_error(retval))
-  {
+  if (is_error(retval)) {
     retval = make_error("Reader error: unbalanced braces '{}'");
   }
-  else if (list_count(retval->value.mal_list) % 2 != 0)
-  {
+  else if (list_count(retval->value.mal_list) % 2 != 0) {
     retval = make_error("Reader error: missing value in map literal");
-  }
-  else
-  {
+  } else {
     retval->type = MALTYPE_HASHMAP;
   }
   return retval;
 }
 // 读取3个匹配的分隔符 () {} []
-MalType *read_matched_delimiters(Reader *reader, char start_delimiter, char end_delimiter)
-{
+MalType *read_matched_delimiters(Reader *reader, char start_delimiter, char end_delimiter) {
   /* TODO: separate implementation of hashmap and vector */
-
   Token *tok = reader_next(reader);
   list lst = NULL;
 
-  if (reader_peek(reader)->data[0] == end_delimiter)
-  {
+  if (reader_peek(reader)->data[0] == end_delimiter) {
     reader_next(reader);
     return make_list(NULL);
-  }
-  else
-  {
-    while (tok->data[0] != end_delimiter)
-    {
+  } else {
+    while (tok->data[0] != end_delimiter) {
 
       MalType *val = read_form(reader); //递归 读取了
       lst = list_push(lst, (gptr)val);
 
       tok = reader_peek(reader);
 
-      if (!tok)
-      {
+      if (!tok) {
         /* unbalanced parentheses */
         return make_error("");
       }
