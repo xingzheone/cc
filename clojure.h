@@ -263,3 +263,77 @@ char *pr_str(MalType *mal_val, int readably);
 char *pr_str_list(list lst, int readably, char *start_delimiter, char *end_delimiter, char *separator);
 char *escape_string(char *str);
 char *snprintfbuf(long initial_size, char *fmt, ...);
+
+// ns core native fn
+/* forward references to main file */
+MalType *apply(MalType *fn, list args);
+
+/* core ns functions */
+MalType *mal_add(list);
+MalType *mal_sub(list);
+MalType *mal_mul(list);
+MalType *mal_div(list);
+
+MalType *mal_prn(list);
+MalType *mal_println(list);
+MalType *mal_pr_str(list);
+MalType *mal_str(list);
+MalType *mal_read_string(list);
+MalType *mal_slurp(list);
+
+MalType *mal_list(list);
+MalType *mal_list_questionmark(list);
+MalType *mal_empty_questionmark(list);
+MalType *mal_count(list);
+MalType *mal_cons(list);
+MalType *mal_concat(list);
+MalType *mal_nth(list);
+MalType *mal_first(list);
+MalType *mal_rest(list);
+
+MalType *mal_equals(list);
+MalType *mal_lessthan(list);
+MalType *mal_lessthanorequalto(list);
+MalType *mal_greaterthan(list);
+MalType *mal_greaterthanorequalto(list);
+
+MalType *mal_atom(list);
+MalType *mal_atom_questionmark(list);
+MalType *mal_deref(list);
+MalType *mal_reset_bang(list);
+MalType *mal_swap_bang(list);
+
+MalType *mal_throw(list);
+MalType *mal_apply(list);
+MalType *mal_map(list);
+
+MalType *mal_nil_questionmark(list);
+MalType *mal_true_questionmark(list);
+MalType *mal_false_questionmark(list);
+MalType *mal_symbol_questionmark(list);
+MalType *mal_keyword_questionmark(list);
+MalType *mal_symbol(list);
+MalType *mal_keyword(list);
+
+MalType *mal_vec(list);
+MalType *mal_vector(list);
+MalType *mal_vector_questionmark(list);
+MalType *mal_sequential_questionmark(list);
+MalType *mal_hash_map(list);
+MalType *mal_map_questionmark(list);
+MalType *mal_assoc(list);
+MalType *mal_dissoc(list);
+MalType *mal_get(list);
+MalType *mal_contains_questionmark(list);
+MalType *mal_keys(list);
+MalType *mal_vals(list);
+MalType *mal_string_questionmark(list);
+MalType *mal_number_questionmark(list);
+MalType *mal_fn_questionmark(list);
+MalType *mal_macro_questionmark(list);
+
+MalType *mal_time_ms(list);
+MalType *mal_conj(list);
+MalType *mal_seq(list);
+MalType *mal_meta(list);
+MalType *mal_with_meta(list);

@@ -873,7 +873,9 @@ MalType *read_atom(Reader *reader) {
 
 MalType *make_symbol_list(Reader *reader, char *symbol_name) {
   reader_next(reader);
-  list lst = list_push(lst, make_symbol(symbol_name));   /* push the symbol and the following form onto the list */
+  list lst = NULL;
+  /* push the symbol and the following form onto the list */
+  lst = list_push(lst, make_symbol(symbol_name));
   lst = list_push(lst, read_form(reader));
   return make_list(list_reverse(lst));
 }
@@ -2963,11 +2965,13 @@ char *pr_str_list(list lst, int readably, char *start_delimiter, char *end_delim
     }
     strncat(list_buffer, str, len);
     lst = lst->next;
-    if (lst) {
+    if (lst)
+    {
       len = strlen(separator);
       count += len;
 
-      if (count >= buffer_length) {
+      if (count >= buffer_length)
+      {
         buffer_length += (count + 1);
         list_buffer = GC_REALLOC(list_buffer, buffer_length);
       }
@@ -2976,14 +2980,18 @@ char *pr_str_list(list lst, int readably, char *start_delimiter, char *end_delim
     }
   }
 
-  if (count >= buffer_length) {
+  if (count >= buffer_length)
+  {
     len = strlen(end_delimiter);
     count += len;
+
     buffer_length += (count + 1);
     list_buffer = GC_REALLOC(list_buffer, buffer_length);
   }
+
   /* add the end delimiter */
   strncat(list_buffer, end_delimiter, len);
+
   return list_buffer;
 }
 
