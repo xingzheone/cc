@@ -41,11 +41,9 @@ long list_count(list lst)
 list list_reverse(list lst)
 {
   /* list is not empty and has more than one element */
-  if (lst && lst->next)
-  {
+  if (lst && lst->next) {
     pair *prev = NULL, *next = NULL, *current = lst;
-    while (current)
-    {
+    while (current) {
       /* stash current value of next pointer --> */
       next = current->next;
       /* reverse the next pointer on current pair <-- */
@@ -223,25 +221,19 @@ gptr hashmap_getf(hashmap map, char *keystring, char *(*fn)(gptr))
   return NULL; /* not found */
 }
 
-hashmap hashmap_updatef(hashmap map, char *keystring, gptr value, char *(*fn)(gptr))
-{
+hashmap hashmap_updatef(hashmap map, char *keystring, gptr value, char *(*fn)(gptr)) {
   /* handle empty case */
-  if (!map)
-  {
+  if (!map) {
     return NULL;
   }
   list lst = map;
-  while (lst)
-  {
+  while (lst) {
     /* apply fn to the data to get a string */
     char *item = fn(lst->data);
-    if (strcmp(keystring, item) == 0)
-    {
+    if (strcmp(keystring, item) == 0) {
       (lst->next)->data = value; /* update the next item in list which is the value */
       return map;                /* update made */
-    }
-    else
-    {
+    } else {
       lst = (lst->next)->next; /* skip the next item in the list to get to the next key */
     }
   }
@@ -254,188 +246,110 @@ MalType THE_TRUE = {MALTYPE_TRUE, 0, 0, {0}};
 MalType THE_FALSE = {MALTYPE_FALSE, 0, 0, {0}};
 MalType THE_NIL = {MALTYPE_NIL, 0, 0, {0}};
 
-inline int is_sequential(MalType *val)
-{
+inline int is_sequential(MalType *val) {
   return (val->type == MALTYPE_LIST || val->type == MALTYPE_VECTOR);
 }
 
-inline int is_self_evaluating(MalType *val)
-{
+inline int is_self_evaluating(MalType *val) {
   return (val->type == MALTYPE_KEYWORD || val->type == MALTYPE_INTEGER ||
           val->type == MALTYPE_FLOAT || val->type == MALTYPE_STRING ||
           val->type == MALTYPE_TRUE || val->type == MALTYPE_FALSE ||
           val->type == MALTYPE_NIL);
 }
 
-inline int is_list(MalType *val)
-{
-  return (val->type == MALTYPE_LIST);
-}
+inline int is_list(MalType *val) { return (val->type == MALTYPE_LIST); }
 
-inline int is_vector(MalType *val)
-{
-  return (val->type == MALTYPE_VECTOR);
-}
+inline int is_vector(MalType *val) { return (val->type == MALTYPE_VECTOR); }
 
-inline int is_hashmap(MalType *val)
-{
-  return (val->type == MALTYPE_HASHMAP);
-}
+inline int is_hashmap(MalType *val) { return (val->type == MALTYPE_HASHMAP); }
 
-inline int is_nil(MalType *val)
-{
-  return (val->type == MALTYPE_NIL);
-}
+inline int is_nil(MalType *val) { return (val->type == MALTYPE_NIL); }
 
-inline int is_string(MalType *val)
-{
-  return (val->type == MALTYPE_STRING);
-}
+inline int is_string(MalType *val) { return (val->type == MALTYPE_STRING); }
 
-inline int is_integer(MalType *val)
-{
-  return (val->type == MALTYPE_INTEGER);
-}
+inline int is_integer(MalType *val) { return (val->type == MALTYPE_INTEGER); }
 
-inline int is_float(MalType *val)
-{
-  return (val->type == MALTYPE_FLOAT);
-}
+inline int is_float(MalType *val) { return (val->type == MALTYPE_FLOAT); }
 
-inline int is_number(MalType *val)
-{
-  return (val->type == MALTYPE_INTEGER || val->type == MALTYPE_FLOAT);
-}
+inline int is_number(MalType *val) { return (val->type == MALTYPE_INTEGER || val->type == MALTYPE_FLOAT); }
 
-inline int is_true(MalType *val)
-{
-  return (val->type == MALTYPE_TRUE);
-}
+inline int is_true(MalType *val) { return (val->type == MALTYPE_TRUE); }
 
-inline int is_false(MalType *val)
-{
-  return (val->type == MALTYPE_FALSE);
-}
+inline int is_false(MalType *val) { return (val->type == MALTYPE_FALSE); }
 
-inline int is_symbol(MalType *val)
-{
-  return (val->type == MALTYPE_SYMBOL);
-}
+inline int is_symbol(MalType *val) { return (val->type == MALTYPE_SYMBOL); }
 
-inline int is_keyword(MalType *val)
-{
-  return (val->type == MALTYPE_KEYWORD);
-}
+inline int is_keyword(MalType *val) { return (val->type == MALTYPE_KEYWORD); }
 
-inline int is_atom(MalType *val)
-{
-  return (val->type == MALTYPE_ATOM);
-}
+inline int is_atom(MalType *val) { return (val->type == MALTYPE_ATOM); }
 
-inline int is_error(MalType *val)
-{
-  return (val->type == MALTYPE_ERROR);
-}
+inline int is_error(MalType *val) { return (val->type == MALTYPE_ERROR); }
 
-inline int is_callable(MalType *val)
-{
-  return (val->type == MALTYPE_FUNCTION || val->type == MALTYPE_CLOSURE);
-}
+inline int is_callable(MalType *val) { return (val->type == MALTYPE_FUNCTION || val->type == MALTYPE_CLOSURE); }
 
-inline int is_function(MalType *val)
-{
-  return (val->type == MALTYPE_FUNCTION);
-}
+inline int is_function(MalType *val) { return (val->type == MALTYPE_FUNCTION); }
 
-inline int is_closure(MalType *val)
-{
-  return (val->type == MALTYPE_CLOSURE);
-}
+inline int is_closure(MalType *val) { return (val->type == MALTYPE_CLOSURE); }
 
-inline int is_macro(MalType *val)
-{
-  return (val->is_macro);
-}
+inline int is_macro(MalType *val) { return (val->is_macro); }
 
-MalType *make_symbol(char *value)
-{
-
+MalType *make_symbol(char *value) {
   MalType *mal_val = GC_MALLOC(sizeof(*mal_val));
   mal_val->type = MALTYPE_SYMBOL;
   mal_val->value.mal_symbol = value;
   mal_val->metadata = NULL;
-
   return mal_val;
 }
 
-MalType *make_integer(long value)
-{
-
+MalType *make_integer(long value) {
   MalType *mal_val = GC_MALLOC(sizeof(*mal_val));
   mal_val->type = MALTYPE_INTEGER;
   mal_val->value.mal_integer = value;
   mal_val->metadata = NULL;
-
   return mal_val;
 }
 
-MalType *make_float(double value)
-{
-
+MalType *make_float(double value) {
   MalType *mal_val = GC_MALLOC(sizeof(*mal_val));
   mal_val->type = MALTYPE_FLOAT;
   mal_val->value.mal_float = value;
   mal_val->metadata = NULL;
-
   return mal_val;
 }
 
-MalType *make_keyword(char *value)
-{
-
+MalType *make_keyword(char *value) {
   MalType *mal_val = GC_MALLOC(sizeof(*mal_val));
   mal_val->type = MALTYPE_KEYWORD;
   mal_val->value.mal_keyword = value;
   mal_val->metadata = NULL;
-
   return mal_val;
 }
 
-MalType *make_string(char *value)
-{
-
+MalType *make_string(char *value) {
   MalType *mal_val = GC_MALLOC(sizeof(*mal_val));
   mal_val->type = MALTYPE_STRING;
   mal_val->value.mal_string = value;
   mal_val->metadata = NULL;
-
   return mal_val;
 }
 
-MalType *make_list(list value)
-{
-
+MalType *make_list(list value) {
   MalType *mal_val = GC_MALLOC(sizeof(*mal_val));
   mal_val->type = MALTYPE_LIST;
   mal_val->value.mal_list = value;
   mal_val->metadata = NULL;
-
   return mal_val;
 }
 
-MalType *make_vector(list value)
-{
-
+MalType *make_vector(list value) {
   MalType *mal_val = GC_MALLOC(sizeof(*mal_val));
   mal_val->type = MALTYPE_VECTOR;
   mal_val->value.mal_list = value;
   mal_val->metadata = NULL;
-
   return mal_val;
 }
 
-MalType *make_hashmap(list value)
-{
+MalType *make_hashmap(list value) {
   MalType *mal_val = GC_MALLOC(sizeof(*mal_val));
   mal_val->type = MALTYPE_HASHMAP;
   mal_val->value.mal_list = value;
@@ -443,8 +357,7 @@ MalType *make_hashmap(list value)
   return mal_val;
 }
 
-MalType *make_atom(MalType *value)
-{
+MalType *make_atom(MalType *value) {
   MalType *mal_val = GC_MALLOC(sizeof(*mal_val));
   mal_val->type = MALTYPE_ATOM;
   mal_val->value.mal_atom = value;
@@ -452,8 +365,7 @@ MalType *make_atom(MalType *value)
   return mal_val;
 }
 
-MalType *make_function(MalType *(*fn)(list args))
-{
+MalType *make_function(MalType *(*fn)(list args)) {
   MalType *mal_val = GC_MALLOC(sizeof(*mal_val));
   mal_val->type = MALTYPE_FUNCTION;
   mal_val->value.mal_function = fn;
@@ -462,8 +374,7 @@ MalType *make_function(MalType *(*fn)(list args))
   return mal_val;
 }
 
-MalType *make_closure(Env *env, MalType *parameters, MalType *definition, MalType *more_symbol)
-{
+MalType *make_closure(Env *env, MalType *parameters, MalType *definition, MalType *more_symbol) {
   MalType *mal_val = GC_MALLOC(sizeof(*mal_val));
   mal_val->type = MALTYPE_CLOSURE;
   mal_val->metadata = NULL;
@@ -480,23 +391,13 @@ MalType *make_closure(Env *env, MalType *parameters, MalType *definition, MalTyp
   return mal_val;
 }
 
-inline MalType *make_true()
-{
-  return &THE_TRUE;
-}
+inline MalType *make_true() { return &THE_TRUE; }
 
-inline MalType *make_false()
-{
-  return &THE_FALSE;
-}
+inline MalType *make_false() { return &THE_FALSE; }
 
-inline MalType *make_nil()
-{
-  return &THE_NIL;
-}
+inline MalType *make_nil() { return &THE_NIL; }
 
-MalType *make_error(char *msg)
-{
+MalType *make_error(char *msg) {
   MalType *mal_string = GC_MALLOC(sizeof(*mal_string));
   mal_string->type = MALTYPE_STRING;
   mal_string->value.mal_string = msg;
@@ -508,8 +409,7 @@ MalType *make_error(char *msg)
   return mal_val;
 }
 
-MalType *make_error_fmt(char *fmt, ...)
-{
+MalType *make_error_fmt(char *fmt, ...) {
   va_list argptr;
   va_start(argptr, fmt);
 
@@ -518,8 +418,7 @@ MalType *make_error_fmt(char *fmt, ...)
   long n = vsnprintf(buffer, ERROR_BUFFER_SIZE, fmt, argptr);
   va_end(argptr);
 
-  if (n > ERROR_BUFFER_SIZE)
-  {
+  if (n > ERROR_BUFFER_SIZE) {
     va_start(argptr, fmt);
 
     buffer = GC_REALLOC(buffer, sizeof(*buffer) * n);
@@ -530,58 +429,41 @@ MalType *make_error_fmt(char *fmt, ...)
   return make_error(buffer);
 }
 
-MalType *wrap_error(MalType *value)
-{
-
+MalType *wrap_error(MalType *value) {
   MalType *mal_error = GC_MALLOC(sizeof(*mal_error));
   mal_error->type = MALTYPE_ERROR;
   mal_error->metadata = NULL;
   mal_error->value.mal_error = value;
-
   return mal_error;
 }
 
-MalType *copy_type(MalType *value)
-{
-
+MalType *copy_type(MalType *value) {
   MalType *new_val = GC_MALLOC(sizeof(*new_val));
-
   new_val->type = value->type;
   new_val->is_macro = value->is_macro;
   new_val->value = value->value;
   new_val->metadata = value->metadata;
-
   return new_val;
 }
 
 // end type.c
 // reader.c
 
-Reader *reader_make(long token_capacity)
-{
-
+Reader *reader_make(long token_capacity) {
   Reader *reader = GC_MALLOC(sizeof(*reader));
-
   reader->max_tokens = token_capacity;
   reader->position = 0;
   reader->token_count = 0;
   reader->token_data = GC_MALLOC(sizeof(Token *) * token_capacity);
   reader->error = NULL;
-
   return reader;
 }
 
-Reader *reader_append(Reader *reader, Token *token)
-{
-
-  if (reader->token_count < reader->max_tokens)
-  {
-
+Reader *reader_append(Reader *reader, Token *token) {
+  if (reader->token_count < reader->max_tokens) {
     reader->token_data[reader->token_count] = token;
     reader->token_count++;
-  }
-  else
-  {
+  } else {
     /* TODO: expand the storage more intelligently */
     reader->max_tokens *= 2;
     reader = GC_REALLOC(reader, sizeof(*reader) * reader->max_tokens);
@@ -591,43 +473,30 @@ Reader *reader_append(Reader *reader, Token *token)
   return reader;
 }
 
-Token *reader_peek(const Reader *reader)
-{
-
+Token *reader_peek(const Reader *reader) {
   return (reader->token_data[reader->position]);
 }
 
-Token *reader_next(Reader *reader)
-{
-
+Token *reader_next(Reader *reader) {
   Token *tok = reader->token_data[reader->position];
-
-  if (reader->position == -1)
-  {
+  if (reader->position == -1) {
     return NULL;
-  }
-  else if (reader->position < reader->token_count)
-  {
+  } else if (reader->position < reader->token_count) {
     (reader->position)++;
     return tok;
-  }
-  else
-  {
+  } else {
     reader->position = -1;
     return tok;
   }
 }
 
-void reader_print(Reader *reader)
-{
-  /* NOTE: needed for debugging the reader only */
+/* NOTE: needed for debugging the reader only */
+void reader_print(Reader *reader) {
   Token *tok;
   //需要-1 不然报 Segmentation Fault
-  for (long i = 0; i < reader->token_count - 1; i++)
-  {
+  for (long i = 0; i < reader->token_count - 1; i++) {
     tok = reader_next(reader);
-    switch (tok->type)
-    {
+    switch (tok->type) {
     case TOKEN_SPECIAL_CHARACTER:
       printf("special character: %s", tok->data);
       break;
@@ -666,34 +535,25 @@ void reader_print(Reader *reader)
   reader->position = 0; //恢复
 }
 
-MalType *read_str(char *token_string)
-{
+MalType *read_str(char *token_string) {
   Reader *reader = tokenize(token_string);
-  if (reader->error)
-  {
+  if (reader->error) {
     return make_error_fmt("Reader error: %s", reader->error);
-  }
-  else if (reader->token_count == 0)
-  {
+  } else if (reader->token_count == 0) {
     return make_nil();
-  }
-  else
-  {
+  } else {
     reader_print(reader);
     return read_form(reader);
   }
 }
 // 2022年4月30日 20点37分
-Reader *tokenize(char *token_string)
-{
-  /* allocate enough space for a Reader */
+/* allocate enough space for a Reader */
+Reader *tokenize(char *token_string) {
   /* TODO: over-allocates space */
   Reader *reader = reader_make(strlen(token_string));
-  for (char *next = token_string; *next != '\0';)
-  {
+  for (char *next = token_string; *next != '\0';) {
     Token *token = NULL;
-    switch (*next)
-    {
+    switch (*next) {
       /* skip whitespace */
     case ' ':
     case ',':
@@ -701,7 +561,6 @@ Reader *tokenize(char *token_string)
       next++;
       token = NULL; /* no token for whitespace */
       break;
-
       /* single character token */
     case '[':
     case '\\':
@@ -801,47 +660,32 @@ Reader *tokenize(char *token_string)
   return reader;
 }
 
-char *read_fixed_length_token(char *current, Token **ptoken, int n)
-{
+char *read_fixed_length_token(char *current, Token **ptoken, int n) {
   *ptoken = token_allocate(current, n, TOKEN_SPECIAL_CHARACTER, NULL);
   return (current + n);
 }
 
-char *read_terminated_token(char *current, Token **ptoken, int token_type)
-{
-
+char *read_terminated_token(char *current, Token **ptoken, int token_type) {
   static char *const terminating_characters = " ,[](){};\n";
-
   /* search for first terminating character */
   char *end = strpbrk(current, terminating_characters);
-
   /* if terminating character is not found it implies the end of the string */
   long token_length = !end ? strlen(current) : (end - current);
-
   /* next token starts with the terminating character */
   *ptoken = token_allocate(current, token_length, token_type, NULL);
   return (current + token_length);
 }
 
-char *read_symbol_token(char *current, Token **ptoken)
-{
-
+char *read_symbol_token(char *current, Token **ptoken) {
   char *next = read_terminated_token(current, ptoken, TOKEN_SYMBOL);
-
   /* check for reserved symbols */
-  if (strcmp((*ptoken)->data, SYMBOL_NIL) == 0)
-  {
+  if (strcmp((*ptoken)->data, SYMBOL_NIL) == 0) {
     (*ptoken)->type = TOKEN_NIL;
-  }
-  else if (strcmp((*ptoken)->data, SYMBOL_TRUE) == 0)
-  {
+  } else if (strcmp((*ptoken)->data, SYMBOL_TRUE) == 0) {
     (*ptoken)->type = TOKEN_TRUE;
-  }
-  else if (strcmp((*ptoken)->data, SYMBOL_FALSE) == 0)
-  {
+  } else if (strcmp((*ptoken)->data, SYMBOL_FALSE) == 0) {
     (*ptoken)->type = TOKEN_FALSE;
   }
-
   /* TODO: check for invalid characters */
   return next;
 }
@@ -1208,39 +1052,26 @@ MalType *make_symbol_list(Reader *reader, char *symbol_name)
   return make_list(list_reverse(lst));
 }
 
-Token *token_allocate(char *str, long num_chars, int type, char *error)
-{
-
+Token *token_allocate(char *str, long num_chars, int type, char *error) {
   /* allocate space for the string */
   char *data = GC_MALLOC(sizeof(*data) * num_chars + 1); /* include space for null byte */
   strncpy(data, str, num_chars);                         /* copy num_chars characters into data */
   data[num_chars] = '\0';                                /* manually add the null byte */
-
   /* allocate space for the token struct */
   Token *token = GC_MALLOC(sizeof(*token));
   token->data = data;
   token->type = type;
   token->error = error;
-
   return token;
 }
 
-char *unescape_string(char *str, long length)
-{
-
+char *unescape_string(char *str, long length) {
   char *dest = GC_MALLOC(sizeof(*dest) * length + 1);
-
   long j = 0;
-  for (long i = 0; i < length; i++)
-  {
-
+  for (long i = 0; i < length; i++) {
     /* look for the quoting character */
-    if (str[i] == '\\')
-    {
-
-      switch (str[i + 1])
-      {
-
+    if (str[i] == '\\') {
+      switch (str[i + 1]) {
         /* replace '\"' with normal '"' */
       case '"':
         dest[j++] = '"';
@@ -4890,3 +4721,4 @@ int main(int argc, char **argv)
 
 // gcc clojure.c -ledit -lgc
 // gcc -std=c99 -g -Wall clojure.c -ledit -lgc
+// vscode 字体 monaco

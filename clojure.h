@@ -6,9 +6,9 @@
 #include <gc.h>
 #include <stdarg.h>
 #include <ctype.h>
-
 #include <editline/readline.h>
 #include <editline/history.h>
+
 #define MALTYPE_SYMBOL 1
 #define MALTYPE_KEYWORD 2
 #define MALTYPE_INTEGER 3
@@ -83,8 +83,7 @@
 /* simplify references to void pointers */
 typedef void *gptr;
 /* linked list is constructed of pairs */
-typedef struct pair
-{
+typedef struct pair {
   gptr data;
   struct pair *next;
 } pair;
@@ -94,61 +93,51 @@ typedef pair *list;
 /* a hashmap is just a list with alternating key/value pairs */
 typedef pair *hashmap;
 
-typedef struct ns
-{
+typedef struct ns {
   hashmap mappings;
 } ns;
 
-typedef struct Env
-{
+typedef struct Env {
   struct Env *outer;
   hashmap data;
 } Env;
 
 typedef struct MalType MalType;
-// typedef struct MalClosure_s MalClosure;
 
-typedef struct MalClosure
-{
+typedef struct MalClosure {
   Env *env;
   MalType *parameters;
   MalType *more_symbol;
   MalType *definition;
 } MalClosure;
-
-typedef struct MalType
-{
+/*四个字段 
+ vector mal_vector;  TODO: implement a real vector
+ hashmap mal_hashmap; TODO: implement a real hashmap */
+typedef struct MalType {
   int type;
   int is_macro;
   MalType *metadata;
-
-  union MalValue
-  {
+  union MalValue {
     long mal_integer;
     double mal_float;
     char *mal_symbol;
     char *mal_string;
     char *mal_keyword;
     list mal_list;
-    /* vector mal_vector;  TODO: implement a real vector */
-    /* hashmap mal_hashmap; TODO: implement a real hashmap */
     MalType *(*mal_function)(list);
     MalClosure *mal_closure;
     MalType *mal_atom;
     MalType *mal_error;
   } value;
-
 } MalType;
 
-typedef struct Token
-{
+typedef struct Token {
   int type;
   char *data;
   char *error;
 } Token;
 
-typedef struct Reader
-{
+typedef struct Reader {
   long position;      // current position in the array
   long token_count;   // number of tokens in the array
   long max_tokens;    // maximum number of tokens the array can hold
