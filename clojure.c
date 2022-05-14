@@ -1252,37 +1252,23 @@ MalType *mal_sub(list args) {
   }
 }
 
-MalType *mal_mul(list args)
-{
-  /* Accepts any number of arguments */
-
+/* Accepts any number of arguments */
+MalType *mal_mul(list args) {
   int return_float = 0;
-
   long i_product = 1;
   double r_product = 1.0;
-
-  while (args)
-  {
-
+  while (args) {
     MalType *val = args->data;
-
-    if (!is_number(val))
-    {
+    if (!is_number(val)) {
       return make_error_fmt("'*': expected numerical arguments");
     }
-
-    if (is_integer(val) && !return_float)
-    {
+    if (is_integer(val) && !return_float) {
       i_product *= val->value.mal_integer;
-    }
-    else if (is_integer(val))
-    {
+    } else if (is_integer(val)) {
       r_product *= (double)val->value.mal_integer;
       r_product *= (double)i_product;
       i_product = 1;
-    }
-    else
-    {
+    } else {
       r_product *= (double)i_product;
       r_product *= val->value.mal_float;
       i_product = 1;
@@ -1291,85 +1277,54 @@ MalType *mal_mul(list args)
     args = args->next;
   }
 
-  if (return_float)
-  {
+  if (return_float) {
     return make_float(r_product);
-  }
-  else
-  {
+  } else {
     return make_integer(i_product);
   }
 }
 
-MalType *mal_div(list args)
-{
-  /* Accepts any number of arguments */
-
+MalType *mal_div(list args) {
   int return_float = 0;
-
   long i_product = 1;
   double r_product = 1.0;
 
-  if (args)
-  {
+  if (args) {
     MalType *val = args->data;
-
-    if (!is_number(val))
-    {
+    if (!is_number(val)) {
       return make_error_fmt("'/': expected numerical arguments");
     }
-
-    if (is_integer(val))
-    {
+    if (is_integer(val)) {
       i_product = val->value.mal_integer;
-    }
-    else
-    {
+    } else {
       r_product = val->value.mal_float;
       return_float = 1;
     }
-
     args = args->next;
-
-    while (args)
-    {
-
+    while (args) {
       val = args->data;
-
-      if (!is_number(val))
-      {
+      if (!is_number(val)) {
         return make_error_fmt("'/': expected numerical arguments");
       }
-
       /* integer division */
-      if (is_integer(val) && !return_float)
-      {
+      if (is_integer(val) && !return_float) {
         i_product /= val->value.mal_integer;
-      }
-      /* promote integer to double */
-      else if (is_integer(val))
-      {
-        if (i_product != 1)
-        {
+      } /* promote integer to double */
+      else if (is_integer(val)) {
+        if (i_product != 1) {
           r_product = (double)i_product / (double)val->value.mal_integer;
           i_product = 1;
-        }
-        else
-        {
+        } else {
           r_product /= (double)val->value.mal_integer;
         }
       }
       /* double division */
-      else
-      {
+      else {
         return_float = 1;
-        if (i_product != 1)
-        {
+        if (i_product != 1) {
           r_product = (double)i_product / val->value.mal_float;
           i_product = 1;
-        }
-        else
-        {
+        } else {
           r_product /= val->value.mal_float;
         }
       }
@@ -1377,190 +1332,122 @@ MalType *mal_div(list args)
     }
   }
 
-  if (return_float)
-  {
+  if (return_float) {
     return make_float(r_product);
-  }
-  else
-  {
+  } else {
     return make_integer(i_product);
   }
 }
 
-MalType *mal_lessthan(list args)
-{
-
-  if (!args || !args->next || args->next->next)
-  {
+MalType *mal_lessthan(list args) {
+  if (!args || !args->next || args->next->next) {
     return make_error_fmt("'<': expected exactly two arguments");
   }
-
   MalType *first_val = args->data;
   MalType *second_val = args->next->data;
-
-  if (!is_number(first_val) || !is_number(second_val))
-  {
+  if (!is_number(first_val) || !is_number(second_val)) {
     return make_error_fmt("'<': expected numerical arguments");
   }
 
   int cmp = 0;
 
-  if (is_integer(first_val) && is_integer(second_val))
-  {
+  if (is_integer(first_val) && is_integer(second_val)) {
     cmp = (first_val->value.mal_integer < second_val->value.mal_integer);
-  }
-  else if (is_integer(first_val) && is_float(second_val))
-  {
+  } else if (is_integer(first_val) && is_float(second_val)) {
     cmp = (first_val->value.mal_integer < second_val->value.mal_float);
-  }
-  else if (is_float(first_val) && is_integer(second_val))
-  {
+  } else if (is_float(first_val) && is_integer(second_val)) {
     cmp = (first_val->value.mal_float < second_val->value.mal_integer);
-  }
-  else if (is_float(first_val) && is_float(second_val))
-  {
+  } else if (is_float(first_val) && is_float(second_val)) {
     cmp = (first_val->value.mal_float < second_val->value.mal_float);
-  }
-  else
-  {
+  } else {
     /* shouldn't happen unless new numerical type is added */
     return make_error_fmt("'<': unknown numerical type");
   }
-
-  if (cmp)
-  {
+  if (cmp) {
     return make_true();
-  }
-  else
-  {
+  } else {
     return make_false();
   }
 }
 
-MalType *mal_lessthanorequalto(list args)
-{
-
-  if (!args || !args->next || args->next->next)
-  {
+MalType *mal_lessthanorequalto(list args) {
+  if (!args || !args->next || args->next->next) {
     return make_error_fmt("'<=': expected exactly two arguments");
   }
-
   MalType *first_val = args->data;
   MalType *second_val = args->next->data;
-
-  if (!is_number(first_val) || !is_number(second_val))
-  {
+  if (!is_number(first_val) || !is_number(second_val)) {
     return make_error_fmt("'<=': expected numerical arguments");
   }
 
   int cmp = 0;
-
-  if (is_integer(first_val) && is_integer(second_val))
-  {
+  if (is_integer(first_val) && is_integer(second_val)) {
     cmp = (first_val->value.mal_integer <= second_val->value.mal_integer);
-  }
-  else if (is_integer(first_val) && is_float(second_val))
-  {
+  } else if (is_integer(first_val) && is_float(second_val)) {
     cmp = (first_val->value.mal_integer <= second_val->value.mal_float);
-  }
-  else if (is_float(first_val) && is_integer(second_val))
-  {
+  } else if (is_float(first_val) && is_integer(second_val)) {
     cmp = (first_val->value.mal_float <= second_val->value.mal_integer);
-  }
-  else if (is_float(first_val) && is_float(second_val))
-  {
+  } else if (is_float(first_val) && is_float(second_val)) {
     cmp = (first_val->value.mal_float < second_val->value.mal_float);
-  }
-  else
-  {
+  } else {
     /* shouldn't happen unless new numerical type is added */
     return make_error_fmt("'<=': unknown numerical type");
   }
 
-  if (cmp)
-  {
+  if (cmp) {
     return make_true();
-  }
-  else
-  {
+  } else {
     return make_false();
   }
 }
 
-MalType *mal_greaterthan(list args)
-{
-
-  if (!args || !args->next || args->next->next)
-  {
+MalType *mal_greaterthan(list args) {
+  if (!args || !args->next || args->next->next) {
     return make_error_fmt("'>': expected exactly two arguments");
   }
-
   MalType *first_val = args->data;
   MalType *second_val = args->next->data;
 
-  if (!is_number(first_val) || !is_number(second_val))
-  {
+  if (!is_number(first_val) || !is_number(second_val)) {
     return make_error_fmt("'>': expected numerical arguments");
   }
-
   int cmp = 0;
-
-  if (is_integer(first_val) && is_integer(second_val))
-  {
+  if (is_integer(first_val) && is_integer(second_val)) {
     cmp = (first_val->value.mal_integer > second_val->value.mal_integer);
   }
-  else if (is_integer(first_val) && is_float(second_val))
-  {
+  else if (is_integer(first_val) && is_float(second_val)) {
     cmp = (first_val->value.mal_integer > second_val->value.mal_float);
-  }
-  else if (is_float(first_val) && is_integer(second_val))
-  {
+  } else if (is_float(first_val) && is_integer(second_val)) {
     cmp = (first_val->value.mal_float > second_val->value.mal_integer);
-  }
-  else if (is_float(first_val) && is_float(second_val))
-  {
+  } else if (is_float(first_val) && is_float(second_val)) {
     cmp = (first_val->value.mal_float > second_val->value.mal_float);
-  }
-  else
-  {
+  } else {
     /* shouldn't happen unless new numerical type is added */
     return make_error_fmt("'>': unknown numerical type");
   }
 
-  if (cmp)
-  {
+  if (cmp) {
     return make_true();
-  }
-  else
-  {
+  } else {
     return make_false();
   }
 }
 
-MalType *mal_greaterthanorequalto(list args)
-{
-
-  if (!args || !args->next || args->next->next)
-  {
+MalType *mal_greaterthanorequalto(list args) {
+  if (!args || !args->next || args->next->next) {
     return make_error_fmt("'>=': expected exactly two arguments");
   }
 
   MalType *first_val = args->data;
   MalType *second_val = args->next->data;
 
-  if (!is_number(first_val) || !is_number(second_val))
-  {
+  if (!is_number(first_val) || !is_number(second_val)) {
     return make_error_fmt("'>=': expected numerical arguments");
   }
-
   int cmp = 0;
-
-  if (is_integer(first_val) && is_integer(second_val))
-  {
+  if (is_integer(first_val) && is_integer(second_val)) {
     cmp = (first_val->value.mal_integer >= second_val->value.mal_integer);
-  }
-  else if (is_integer(first_val) && is_float(second_val))
-  {
+  } else if (is_integer(first_val) && is_float(second_val)) {
     cmp = (first_val->value.mal_integer >= second_val->value.mal_float);
   }
   else if (is_float(first_val) && is_integer(second_val))
@@ -1587,12 +1474,8 @@ MalType *mal_greaterthanorequalto(list args)
   }
 }
 
-MalType *mal_equals(list args)
-{
-  /* Accepts any type of arguments */
-
-  if (!args || !args->next || args->next->next)
-  {
+MalType *mal_equals(list args) {
+  if (!args || !args->next || args->next->next) {
     return make_error_fmt("'=': expected exactly two arguments");
   }
 
@@ -1710,96 +1593,59 @@ MalType *mal_equals(list args)
   return make_false();
 }
 
-MalType *mal_list(list args)
-{
-  /* Accepts any number and type of arguments */
+MalType *mal_list(list args) {
   return make_list(args);
 }
 
-MalType *mal_nth(list args)
-{
-
-  if (!args || !args->next || args->next->next)
-  {
+MalType *mal_nth(list args) {
+  if (!args || !args->next || args->next->next) {
     return make_error("'nth': Expected exactly two arguments");
   }
-
   MalType *lst = args->data;
   MalType *n = args->next->data;
-
-  if (!is_sequential(lst))
-  {
+  if (!is_sequential(lst)) {
     return make_error_fmt("'nth': first argument is not a list or vector: '%s'\n", pr_str(lst, UNREADABLY));
   }
-
-  if (!is_integer(n))
-  {
+  if (!is_integer(n)) {
     return make_error_fmt("'nth': second argument is not an integer: '%s'\n", pr_str(lst, UNREADABLY));
   }
-
   MalType *result = list_nth(lst->value.mal_list, n->value.mal_integer);
-
-  if (result)
-  {
+  if (result) {
     return result;
-  }
-  else
-  {
-    return make_error_fmt("'nth': index %s out of bounds for: '%s'\n",
-                          pr_str(n, UNREADABLY), pr_str(lst, UNREADABLY));
+  } else {
+    return make_error_fmt("'nth': index %s out of bounds for: '%s'\n", pr_str(n, UNREADABLY), pr_str(lst, UNREADABLY));
   }
 }
 
-MalType *mal_first(list args)
-{
-
-  if (!args || args->next)
-  {
+MalType *mal_first(list args) {
+  if (!args || args->next) {
     return make_error("'first': expected exactly one argument");
   }
-
   MalType *lst = args->data;
-
-  if (!is_sequential(lst) && !is_nil(lst))
-  {
+  if (!is_sequential(lst) && !is_nil(lst)) {
     return make_error("'first': expected a list or vector");
   }
-
   MalType *result = list_first(lst->value.mal_list);
-
-  if (result)
-  {
+  if (result) {
     return result;
-  }
-  else
-  {
+  } else {
     return make_nil();
   }
 }
 
-MalType *mal_rest(list args)
-{
-
-  if (!args || args->next)
-  {
+MalType *mal_rest(list args) {
+  if (!args || args->next) {
     return make_error("'rest': expected exactly one argument");
   }
-
   MalType *lst = args->data;
-
-  if (!is_sequential(lst) && !is_nil(lst))
-  {
+  if (!is_sequential(lst) && !is_nil(lst)) {
     return make_error("'rest': expected a list or vector");
   }
-
   list result = list_rest(lst->value.mal_list);
-
-  if (lst)
-  {
+  if (lst) {
     return make_list(result);
   }
-  else
-  {
+  else {
     return make_nil();
   }
 }
@@ -2808,106 +2654,67 @@ MalType *mal_conj(list args)
   }
 }
 
-MalType *mal_seq(list args)
-{
-
-  if (!args || args->next)
-  {
+MalType *mal_seq(list args) {
+  if (!args || args->next) {
     return make_error("'seq': expected exactly one argument");
   }
 
   MalType *val = args->data;
 
-  if (is_sequential(val))
-  {
-
+  if (is_sequential(val)) {
     /* empy list or vector */
-    if (!val->value.mal_list)
-    {
+    if (!val->value.mal_list) {
       return make_nil();
-    }
-    else
-    {
+    } else {
       return make_list(val->value.mal_list);
     }
-  }
-  else if (is_string(val))
-  {
-
+  } else if (is_string(val)) {
     /* empty string */
-    if (*(val->value.mal_string) == '\0')
-    {
+    if (*(val->value.mal_string) == '\0') {
       return make_nil();
-    }
-    else
-    {
-
+    } else {
       char *ch = val->value.mal_string;
       list lst = NULL;
-
-      while (*ch != '\0')
-      {
+      while (*ch != '\0') {
         char *new_ch = GC_MALLOC(sizeof(*new_ch));
         strncpy(new_ch, ch, 1);
-
         lst = list_push(lst, make_string(new_ch));
         ch++;
       }
       return make_list(list_reverse(lst));
     }
   }
-  else if (is_nil(val))
-  {
+  else if (is_nil(val)) {
     return make_nil();
-  }
-  else
-  {
+  } else {
     return make_error("'seq': expected a list, vector or string");
   }
 }
 
-MalType *mal_meta(list args)
-{
-
-  if (!args || args->next)
-  {
+MalType *mal_meta(list args) {
+  if (!args || args->next) {
     return make_error("'meta': expected exactly one argument");
   }
-
   MalType *val = args->data;
-
-  if (!is_sequential(val) && !is_hashmap(val) && !is_callable(val))
-  {
+  if (!is_sequential(val) && !is_hashmap(val) && !is_callable(val)) {
     return make_error("'meta': metadata not supported for data type");
   }
-
-  if (!val->metadata)
-  {
+  if (!val->metadata) {
     return make_nil();
-  }
-  else
-  {
+  } else {
     return val->metadata;
   }
 }
-
-MalType *mal_with_meta(list args)
-{
-
-  if (!args || !args->next || args->next->next)
-  {
+// 哮天犬  旺旺碎冰冰 
+MalType *mal_with_meta(list args) {
+  if (!args || !args->next || args->next->next) {
     return make_error("'with-meta': expected exactly two arguments");
   }
-
   MalType *val = args->data;
-
-  if (!is_sequential(val) && !is_hashmap(val) && !is_callable(val))
-  {
+  if (!is_sequential(val) && !is_hashmap(val) && !is_callable(val)) {
     return make_error("'with-meta': metadata not supported for data type");
   }
-
   MalType *metadata = args->next->data;
-
   MalType *new_val = copy_type(val);
   new_val->metadata = metadata;
 
@@ -2916,82 +2723,56 @@ MalType *mal_with_meta(list args)
 
 /* helper functions */
 
-MalType *as_str(list args, int readably, char *separator)
-{
-
+MalType *as_str(list args, int readably, char *separator) {
   long buffer_length = STRING_BUFFER_SIZE;
   long separator_length = strlen(separator);
   char *buffer = GC_MALLOC(sizeof(*buffer) * STRING_BUFFER_SIZE);
   long char_count = 0;
 
-  while (args)
-  {
-
+  while (args) {
     MalType *arg = args->data;
     char *str = pr_str(arg, readably);
     int len = strlen(str);
 
     char_count += len;
     char_count += separator_length;
-    if (char_count >= buffer_length)
-    {
+    if (char_count >= buffer_length) {
       buffer = GC_REALLOC(buffer, sizeof(*buffer) * char_count + 1);
     }
-
     strncat(buffer, str, char_count);
     args = args->next;
-
-    if (args)
-    {
+    if (args) {
       strcat(buffer, separator);
     }
   }
   return make_string(buffer);
 }
 
-MalType *print(list args, int readably, char *separator)
-{
-
-  while (args)
-  {
-
+MalType *print(list args, int readably, char *separator) {
+  while (args) {
     printf("%s", pr_str(args->data, readably));
     args = args->next;
-
-    if (args)
-    {
+    if (args) {
       printf("%s", separator);
     }
   }
   printf("\n");
-
   return make_nil();
 }
 
-MalType *equal_lists(MalType *list1, MalType *list2)
-{
-
+MalType *equal_lists(MalType *list1, MalType *list2) {
   list first = list1->value.mal_list;
   list second = list2->value.mal_list;
 
-  if (list_count(first) != list_count(second))
-  {
+  if (list_count(first) != list_count(second)) {
     return make_false();
-  }
-  else
-  {
-
-    while (first && second)
-    {
-
+  } else {
+    while (first && second) {
       list args = NULL;
       args = list_push(args, second->data);
       args = list_push(args, first->data);
-
       MalType *cmp = mal_equals(args);
-
-      if (is_false(cmp))
-      {
+      if (is_false(cmp)) {
         return make_false();
         break;
       }
@@ -3002,31 +2783,23 @@ MalType *equal_lists(MalType *list1, MalType *list2)
   }
 }
 
-MalType *equal_hashmaps(MalType *map1, MalType *map2)
-{
-
+MalType *equal_hashmaps(MalType *map1, MalType *map2) {
   list first = map1->value.mal_list;
   list second = map2->value.mal_list;
 
-  if (!first && !second)
-  {
+  if (!first && !second) {
     return make_true();
   }
-
-  if (list_count(first) != list_count(second))
-  {
+  if (list_count(first) != list_count(second)) {
     return make_false();
   }
 
-  while (first)
-  {
-
+  while (first) {
     MalType *key1 = first->data;
     MalType *val1 = first->next->data;
     MalType *val2 = hashmap_getf(second, get_fn(key1), get_fn);
 
-    if (!val2)
-    {
+    if (!val2) {
       return make_false();
     }
 
@@ -3036,8 +2809,7 @@ MalType *equal_hashmaps(MalType *map1, MalType *map2)
 
     MalType *cmp = mal_equals(args);
 
-    if (is_false(cmp))
-    {
+    if (is_false(cmp)) {
       return make_false();
       break;
     }
@@ -3047,29 +2819,18 @@ MalType *equal_hashmaps(MalType *map1, MalType *map2)
 }
 
 /* helper function for get */
-char *get_fn(gptr data)
-{
-
+char *get_fn(gptr data) {
   MalType *val = data;
-
-  switch (val->type)
-  {
-
+  switch (val->type) {
   case MALTYPE_STRING:
-
     return (val->value.mal_string);
     break;
-
   case MALTYPE_SYMBOL:
-
     return (val->value.mal_symbol);
     break;
-
   case MALTYPE_KEYWORD:
-
     return (val->value.mal_keyword);
     break;
-
   default:
     return NULL;
   }
@@ -3079,7 +2840,6 @@ char *get_fn(gptr data)
 //  printer.c
 char *pr_str(MalType *val, int readably) {
   if (!val) return "";
-
   switch (val->type) {
   case MALTYPE_SYMBOL:
     return snprintfbuf(SYMBOL_BUFFER_SIZE, "%s", val->value.mal_symbol);
@@ -3181,9 +2941,7 @@ char *pr_str(MalType *val, int readably) {
   }
 }
 
-char *pr_str_list(list lst, int readably, char *start_delimiter, char *end_delimiter, char *separator)
-{
-
+char *pr_str_list(list lst, int readably, char *start_delimiter, char *end_delimiter, char *separator) {
   char *list_buffer = GC_MALLOC(sizeof(*list_buffer) * LIST_BUFFER_SIZE);
   long buffer_length = LIST_BUFFER_SIZE;
 
@@ -3193,9 +2951,7 @@ char *pr_str_list(list lst, int readably, char *start_delimiter, char *end_delim
   long len = strlen(start_delimiter);
   long count = len;
 
-  while (lst)
-  {
-
+  while (lst) {
     /* concatenate next element */
     MalType *data = lst->data;
     char *str = pr_str(data, readably);
@@ -3203,22 +2959,17 @@ char *pr_str_list(list lst, int readably, char *start_delimiter, char *end_delim
     len = strlen(str);
     count += len;
 
-    if (count >= buffer_length)
-    {
+    if (count >= buffer_length) {
       buffer_length += (count + 1);
       list_buffer = GC_REALLOC(list_buffer, buffer_length);
     }
-
     strncat(list_buffer, str, len);
     lst = lst->next;
-
-    if (lst)
-    {
+    if (lst) {
       len = strlen(separator);
       count += len;
 
-      if (count >= buffer_length)
-      {
+      if (count >= buffer_length) {
         buffer_length += (count + 1);
         list_buffer = GC_REALLOC(list_buffer, buffer_length);
       }
@@ -3227,18 +2978,14 @@ char *pr_str_list(list lst, int readably, char *start_delimiter, char *end_delim
     }
   }
 
-  if (count >= buffer_length)
-  {
+  if (count >= buffer_length) {
     len = strlen(end_delimiter);
     count += len;
-
     buffer_length += (count + 1);
     list_buffer = GC_REALLOC(list_buffer, buffer_length);
   }
-
   /* add the end delimiter */
   strncat(list_buffer, end_delimiter, len);
-
   return list_buffer;
 }
 
