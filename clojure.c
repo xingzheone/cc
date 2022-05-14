@@ -4413,30 +4413,17 @@ int main(int argc, char **argv) {
   env_set(repl_env, make_symbol("*ARGV*"), make_list(list_reverse(lst)));
   env_set(repl_env, make_symbol("*host-language*"), make_string("c.2"));
 
-  /* run in script mode if a filename is given */
+  /* first argument on command line is filename */
   if (argc > 1) {
-    /* first argument on command line is filename */
     char *load_command = snprintfbuf(1024, "(load-file \"%s\")", argv[1]);
     EVAL(READ(load_command), repl_env);
   } else {
-    /* run in repl mode when no cmd line args */
-    /* Greeting message */
     EVAL(READ("(println (str \"Mal [\" *host-language* \"]\"))"), repl_env);
-
     while (1) {
-      /* print prompt and get input*/
-      /* readline allocates memory for input */
       char *input = readline(PROMPT_STRING);
-      /* Check for EOF (Ctrl-D) */
-      if (!input) {
-        printf("\n");
-        return 0;
-      }
-      /* add input to history */
+      // if (!input) { printf("\n"); return 0; } /* Check for EOF (Ctrl-D) */
       add_history(input);
-      /* call Read-Eval-Print */
       rep(input, repl_env);
-      /* have to release the memory used by readline */
       free(input);
     }
   }
