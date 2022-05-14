@@ -210,6 +210,9 @@ int is_callable(MalType *val);
 int is_function(MalType *val);
 int is_closure(MalType *val);
 int is_macro(MalType *val);
+int is_macro_call(MalType * ast, Env * env);
+MalType *macroexpand(MalType * ast, Env * env);
+MalType *regularise_parameters(list * params, MalType * *more);
 
 ns *ns_make_core();
 MalType *as_str(list args, int readably, char *separator);
@@ -235,6 +238,7 @@ char *read_comment_token(char *current, Token **ptoken);
 char *read_number_token(char *current, Token **ptoken);
 char *read_symbol_token(char *current, Token **ptoken);
 char *read_keyword_token(char *current, Token **ptoken);
+
 
 /* reading the tokens into types */
 MalType *read_str(char *token_string);
