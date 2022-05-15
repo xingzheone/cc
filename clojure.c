@@ -589,6 +589,7 @@ char *read_fixed_length_token(char *current, Token **ptoken, int n) {
 }
 
 char *read_terminated_token(char *current, Token **ptoken, int token_type) {
+  // printf("terminated: %s \n",current);
   static char *const terminating_characters = " ,[](){};\n";
   /* search for first terminating character */
   char *end = strpbrk(current, terminating_characters);
@@ -598,8 +599,8 @@ char *read_terminated_token(char *current, Token **ptoken, int token_type) {
   *ptoken = token_allocate(current, token_length, token_type, NULL);
   return (current + token_length);
 }
-
-char *read_symbol_token(char *current, Token **ptoken) {
+// identifier 
+char* read_symbol_token(char *current, Token **ptoken) {
   char *next = read_terminated_token(current, ptoken, TOKEN_SYMBOL);
   /* check for reserved symbols */
   if (strcmp((*ptoken)->data, SYMBOL_NIL) == 0) {
@@ -766,7 +767,7 @@ MalType *read_form(Reader *reader) {
         /* shouldn't happen */
         return make_error_fmt("Reader error: Unknown special character '%c'", tok->data[0]);
       }
-    } else { /* Not a special character */
+    } else { /* 当前char 不是 9种符号 ( { [ ' ` ~ @ ~@ ^ Not a special character */
       return read_atom(reader);
     }
   } else { /* no tokens */
@@ -837,9 +838,9 @@ MalType *read_matched_delimiters(Reader *reader, char start_delimiter, char end_
 MalType *read_atom(Reader *reader) {
   Token *tok = reader_next(reader);
   switch (tok->type) {
-  case TOKEN_SPECIAL_CHARACTER:
-    return make_symbol(tok->data);
-    break;
+  // case TOKEN_SPECIAL_CHARACTER:  //这里已经在上面处理过了. 不会进入到这个条件
+  //   return make_symbol(tok->data);
+  //   break;
   case TOKEN_COMMENT:
     return make_error("Error: comment found in token strea");
     break;
@@ -3426,6 +3427,15 @@ MalType *eval_quasiquote(MalType *ast) {
 /*
 https://clojure.org/reference/reader#syntax-quote
 syntax-quote (`, note the "backquote" character), Unquote (~) and Unquote-splicing (~@) quote (')
+quasiquote 是scheme 的叫法 https://scheme.com/tspl4/grammar.html
+'<datum> <graphic> (quote <datum>)
+`<datum> <graphic> (quasiquote <datum>)
+,<datum> <graphic> (unquote <datum>)
+,@<datum> <graphic> (unquote-splicing <datum>)
+#'<datum> <graphic> (syntax <datum>)
+#`<datum> <graphic> (quasisyntax <datum>)
+#,<datum> <graphic> (unsyntax <datum>)
+#,@<datum> <graphic> (unsyntax-splicing <datum>)
 */
 //todo: change quasiquote to syntax-quote
 MalType *quasiquote(MalType *ast) {
@@ -3489,7 +3499,6 @@ MalType *quasiquote_list(MalType *ast) {
       return args->next->data;
     }
   }
-
   /* handle splice-unquote: (quasiquote ((splice-unquote first-second) rest))
      => (concat first-second (quasiquote rest)) */
   else if (is_list(first) &&

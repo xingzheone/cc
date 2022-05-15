@@ -60,6 +60,55 @@ size_t my_strlen2(const char* str) {
     while (*end++); 
     return end - str - 1;
 }
+// #define BITOP(a,b,op) \
+//  ((a)[(size_t)(b)/(8*sizeof *(a))] op (size_t)1<<((size_t)(b)%(8*sizeof *(a))))
+
+// size_t strcspn1(const char *s, const char *c) {
+// 	const char *a = s;
+// 	size_t byteset[32/sizeof(size_t)];
+// 	if (!c[0] || !c[1]) return __strchrnul(s, *c)-a;
+// 	memset(byteset, 0, sizeof byteset);
+// 	for (; *c && BITOP(byteset, *(unsigned char *)c, |=); c++);
+// 	for (; *s && !BITOP(byteset, *(unsigned char *)s, &); s++);
+// 	return s-a;
+// }
+
+char *strpbrk1(const char *s, const char *b)
+{
+	s += strcspn(s, b);
+	return *s ? (char *)s : 0;
+}
+
+// 二级指针传参 练习
+int sq(char** num) {
+    *num="feng";
+    return 2;
+}
+void feng(){
+    char* one="a";
+    sq(&one);
+    printf("c: %s \n",one);
+}
+int sq1(char* num) {
+    printf("ca: %s \n",num);
+    num="feng";
+    return 2;
+}
+void feng1(){
+    char* one="a";
+    sq1(one);
+    printf("c: %s \n",one);
+}
+
+void cm(char *p, int num) {
+	p = (char *)malloc(sizeof(char)*num);
+}
+void cm2(char **p, int num) {
+	// p = (char *)malloc(sizeof(char)*num); //不会报错.
+	*p = (char *)malloc(sizeof(char)*num);
+}
+
+
 // http://c.biancheng.net/c/assert/ 
 // 在操作指针时，一定要保证在指针有效内存空间内操作,不然 Segmentation fault  段错误。 被操作系统kill.
 // c编译器内置宏 https://zhuanlan.zhihu.com/p/409044316
@@ -100,5 +149,22 @@ int main(void)
     printf("%d \n",strlen("wanglaowu"));
     printf("%d \n",strlen("行者"));  // strlen 计算的是字节 不是字符。
     printf("%d \n",wcslen("行者"));  // strlen 计算的是字节 不是字符。
+
+    static char *const terminating_characters = " ,[](){};\n";
+    const char* identifier="fen[g (+ 3 2)";
+    char *end = strpbrk(identifier, terminating_characters);
+    printf("strpbrk: %s \n",end);
+    feng1();
+    feng();
+    char *str1 = NULL;
+    printf("addr1: %p \n",&str1);
+    printf("addr1: %p \n",str1);
+	  cm(str1, 20);
+    printf("addr2: %p \n",str1);
+    // printf("addr3: %p \n",&str1);
+	  // cm2(str1, 20); //不会报错...
+	  cm2(&str1, 20);
+    printf("addr4: %p \n",str1);
     return 0;
 }
+// gcc str.c  && ./a.out

@@ -9,6 +9,7 @@
 #include <editline/readline.h>
 #include <editline/history.h>
 
+//type 15种类型 同像性
 #define MALTYPE_SYMBOL 1
 #define MALTYPE_KEYWORD 2
 #define MALTYPE_INTEGER 3
@@ -28,6 +29,7 @@
 #define UNREADABLY 0
 #define READABLY 1
 
+// special form (special symbol)
 #define SYMBOL_DEFBANG "def!"
 #define SYMBOL_LETSTAR "let*"
 #define SYMBOL_DO "do"
@@ -58,8 +60,8 @@
 #define LIST_BUFFER_SIZE 1024
 #define ERROR_BUFFER_SIZE 128
 
-// read
-#define TOKEN_SPECIAL_CHARACTER 1
+// token type 
+#define TOKEN_SPECIAL_CHARACTER 1  //9种符号 ( { [ ' ` ~ @ ~@ ^
 #define TOKEN_STRING 2
 #define TOKEN_INTEGER 3
 #define TOKEN_FLOAT 4
