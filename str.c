@@ -156,13 +156,15 @@ int main(void)
     printf("strpbrk: %s \n",end);
     feng1();
     feng();
-    char* str1 = NULL;
+    // char* str1 = NULL;
+    char* str1 = "hao";
     printf("addr1: %p \n",&str1);
     printf("addr1: %p \n",str1);
 	  cm(&str1, 20);
     printf("addr2: %p \n",str1);
     // printf("addr3: %p \n",&str1);
-	  // cm2(str1, 20); //不会报错...
+	  // cm2(str1, 20); //报错...
+    // printf("addr3: %p \n",str1);
 	  cm2(&str1, 20);
     printf("addr4: %p \n",str1);
     return 0;
