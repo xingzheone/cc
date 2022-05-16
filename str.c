@@ -167,6 +167,9 @@ int main(void)
     // printf("addr3: %p \n",str1);
 	  cm2(&str1, 20);
     printf("addr4: %p \n",str1);
+    int* a1=12;
+    *a1=88;
+    printf("%p, %d\n",a1,*a1);
     return 0;
 }
 // gcc str.c  && ./a.out
