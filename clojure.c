@@ -1,9 +1,7 @@
 
 #include "clojure.h"
 // list.c
-list list_make(gptr data_ptr) {
-  return list_push(NULL, data_ptr);
-}
+list list_make(gptr data_ptr) { return list_push(NULL, data_ptr); }
 
 list list_push(list lst, gptr data_ptr) {
   pair *new_head = GC_malloc(sizeof(pair));
@@ -149,9 +147,11 @@ gptr hashmap_get(hashmap map, char *keystring) {
   list lst = map;
   while (lst) {
     if (strcmp(keystring, (char *)lst->data) == 0) {
-      return (lst->next)->data; /* return next item in list which is the value */
+      return (lst->next)
+          ->data; /* return next item in list which is the value */
     } else {
-      lst = (lst->next)->next; /* skip the next item in the list to get to the next key */
+      lst = (lst->next)->next; /* skip the next item in the list to get to the
+                                  next key */
     }
   }
   return NULL; /* not found */
@@ -167,16 +167,18 @@ gptr hashmap_getf(hashmap map, char *keystring, char *(*fn)(gptr)) {
     /* apply fn to the data to get a string */
     char *item = fn(lst->data);
     if (strcmp(keystring, item) == 0) {
-      return (lst->next)->data; /* return next item in list which is the value */
-    }
-    else {
-      lst = (lst->next)->next; /* skip the next item in the list to get to the next key */
+      return (lst->next)
+          ->data; /* return next item in list which is the value */
+    } else {
+      lst = (lst->next)->next; /* skip the next item in the list to get to the
+                                  next key */
     }
   }
   return NULL; /* not found */
 }
 
-hashmap hashmap_updatef(hashmap map, char *keystring, gptr value, char *(*fn)(gptr)) {
+hashmap hashmap_updatef(hashmap map, char *keystring, gptr value,
+                        char *(*fn)(gptr)) {
   /* handle empty case */
   if (!map) {
     return NULL;
@@ -186,10 +188,12 @@ hashmap hashmap_updatef(hashmap map, char *keystring, gptr value, char *(*fn)(gp
     /* apply fn to the data to get a string */
     char *item = fn(lst->data);
     if (strcmp(keystring, item) == 0) {
-      (lst->next)->data = value; /* update the next item in list which is the value */
-      return map;                /* update made */
+      (lst->next)->data =
+          value;  /* update the next item in list which is the value */
+      return map; /* update made */
     } else {
-      lst = (lst->next)->next; /* skip the next item in the list to get to the next key */
+      lst = (lst->next)->next; /* skip the next item in the list to get to the
+                                  next key */
     }
   }
   return NULL; /* no update */
@@ -226,7 +230,9 @@ inline int is_integer(MalType *val) { return (val->type == MALTYPE_INTEGER); }
 
 inline int is_float(MalType *val) { return (val->type == MALTYPE_FLOAT); }
 
-inline int is_number(MalType *val) { return (val->type == MALTYPE_INTEGER || val->type == MALTYPE_FLOAT); }
+inline int is_number(MalType *val) {
+  return (val->type == MALTYPE_INTEGER || val->type == MALTYPE_FLOAT);
+}
 
 inline int is_true(MalType *val) { return (val->type == MALTYPE_TRUE); }
 
@@ -240,7 +246,9 @@ inline int is_atom(MalType *val) { return (val->type == MALTYPE_ATOM); }
 
 inline int is_error(MalType *val) { return (val->type == MALTYPE_ERROR); }
 
-inline int is_callable(MalType *val) { return (val->type == MALTYPE_FUNCTION || val->type == MALTYPE_CLOSURE); }
+inline int is_callable(MalType *val) {
+  return (val->type == MALTYPE_FUNCTION || val->type == MALTYPE_CLOSURE);
+}
 
 inline int is_function(MalType *val) { return (val->type == MALTYPE_FUNCTION); }
 
@@ -329,7 +337,8 @@ MalType *make_function(MalType *(*fn)(list args)) {
   return mal_val;
 }
 
-MalType *make_closure(Env *env, MalType *parameters, MalType *definition, MalType *more_symbol) {
+MalType *make_closure(Env *env, MalType *parameters, MalType *definition,
+                      MalType *more_symbol) {
   MalType *mal_val = GC_MALLOC(sizeof(*mal_val));
   mal_val->type = MALTYPE_CLOSURE;
   mal_val->metadata = NULL;
@@ -502,8 +511,8 @@ MalType *read_str(char *token_string) {
   }
 }
 // 2022年4月30日 20点37分
-/* allocate enough space for a Reader 
-TODO: over-allocates space 
+/* allocate enough space for a Reader
+TODO: over-allocates space
 */
 Reader *tokenize(char *token_string) {
   Reader *reader = reader_make(strlen(token_string));
@@ -511,14 +520,23 @@ Reader *tokenize(char *token_string) {
     Token *token = NULL;
     //下面的break 注意是 switch 内的.不是for 的.
     switch (*next) {
-    case ' ': case ',':  /* skip whitespace */
+    case ' ':
+    case ',':  /* skip whitespace */
     case 0x0A: /* newline */
       next++;
       token = NULL; /* no token for whitespace */
       break;
       /* single character token */
-    case '[': case '\\': case ']': case '{': case '}':
-    case '(': case ')': case '\'': case '@': case '`':
+    case '[':
+    case '\\':
+    case ']':
+    case '{':
+    case '}':
+    case '(':
+    case ')':
+    case '\'':
+    case '@':
+    case '`':
     case '^':
       next = read_fixed_length_token(next, &token, 1);
       break;
@@ -540,8 +558,16 @@ Reader *tokenize(char *token_string) {
       token = NULL; /* skip token for comments */
       break;
       /* read an integer */
-    case '0': case '1': case '2': case '3': case '4':
-    case '5': case '6': case '7': case '8': case '9':
+    case '0':
+    case '1':
+    case '2':
+    case '3':
+    case '4':
+    case '5':
+    case '6':
+    case '7':
+    case '8':
+    case '9':
       next = read_number_token(next, &token);
       //      next = read_integer_token(next, &token);
       break;
@@ -599,8 +625,8 @@ char *read_terminated_token(char *current, Token **ptoken, int token_type) {
   *ptoken = token_allocate(current, token_length, token_type, NULL);
   return (current + token_length);
 }
-// identifier 
-char* read_symbol_token(char *current, Token **ptoken) {
+// identifier
+char *read_symbol_token(char *current, Token **ptoken) {
   char *next = read_terminated_token(current, ptoken, TOKEN_SYMBOL);
   /* check for reserved symbols */
   if (strcmp((*ptoken)->data, SYMBOL_NIL) == 0) {
@@ -664,7 +690,8 @@ char *read_string_token(char *current, Token **ptoken) {
   while (1) {
     end = strchr(start, '"'); /* find the next " character */
 
-    /* handle failure to find closing quotes - implies end of input has been reached */
+    /* handle failure to find closing quotes - implies end of input has been
+     * reached */
     if (!end) {
       end = current + strlen(current);
       token_length = strlen(current);
@@ -672,8 +699,9 @@ char *read_string_token(char *current, Token **ptoken) {
       error = "EOF reached with unterminated string";
       break;
     }
-    /* if the character preceding the " is a '\' character (escape), need to check if it is escaping the " and if it
-       is then keep searching from the next character */
+    /* if the character preceding the " is a '\' character (escape), need to
+       check if it is escaping the " and if it is then keep searching from the
+       next character */
     else if (*(end - 1) == '\\') {
 
       char *back_ptr = end - 1;
@@ -683,23 +711,26 @@ char *read_string_token(char *current, Token **ptoken) {
 
       long escape_chars = (end - 1) - back_ptr;
 
-      if (escape_chars % 2 == 1) {                 
-         /* odd number of '\' chars means " is not quoted */
+      if (escape_chars % 2 == 1) {
+        /* odd number of '\' chars means " is not quoted */
         start = end + 1; /* so keep searching */
       } else {
-        /* even number of '\' characters means we found the terminating quote mark */
-        token_length = (end - current - 1); /* quotes are excluded from string token */
+        /* even number of '\' characters means we found the terminating quote
+         * mark */
+        token_length =
+            (end - current - 1); /* quotes are excluded from string token */
         break;
       }
-    }
-    else {
-      token_length = (end - current - 1); /* quotes are excluded from string token */
+    } else {
+      token_length =
+          (end - current - 1); /* quotes are excluded from string token */
       break;
     }
   }
 
   char *unescaped_string = unescape_string(current + 1, token_length);
-  *ptoken = token_allocate(unescaped_string, strlen(unescaped_string), TOKEN_STRING, error);
+  *ptoken = token_allocate(unescaped_string, strlen(unescaped_string),
+                           TOKEN_STRING, error);
 
   return (end + 1);
 }
@@ -711,9 +742,11 @@ char *read_comment_token(char *current, Token **ptoken) {
   /* if newline is not found it implies the end of string is reached */
   long token_chars = !end ? strlen(current) : (end - current);
   *ptoken = token_allocate(current, token_chars, TOKEN_COMMENT, NULL);
-  return (current + token_chars + 1); /* next token starts with the char after the newline */
+  return (current + token_chars +
+          1); /* next token starts with the char after the newline */
 }
-// read_form 的时候把 ` ' @ 等quote 规范成了(xxqutoe xxx)等标准的 list 形式. amtf
+// read_form 的时候把 ` ' @ 等quote 规范成了(xxqutoe xxx)等标准的 list 形式.
+// amtf
 MalType *read_form(Reader *reader) {
   if (reader->token_count > 0) {
     Token *tok = reader_peek(reader);
@@ -748,9 +781,9 @@ MalType *read_form(Reader *reader) {
         /* create and return a MalType list (deref read_form) */
         return make_symbol_list(reader, SYMBOL_DEREF);
       case '^':
-        /* create and return a MalType list (with-meta <second-form> <first-form>
-           where first form should ne a metadata map and second form is somethingh
-           that can have metadata attached */
+        /* create and return a MalType list (with-meta <second-form>
+           <first-form> where first form should ne a metadata map and second
+           form is somethingh that can have metadata attached */
         reader_next(reader);
         /* grab the components of the list */
         MalType *symbol = make_symbol(SYMBOL_WITH_META);
@@ -765,9 +798,11 @@ MalType *read_form(Reader *reader) {
         return make_list(lst);
       default:
         /* shouldn't happen */
-        return make_error_fmt("Reader error: Unknown special character '%c'", tok->data[0]);
+        return make_error_fmt("Reader error: Unknown special character '%c'",
+                              tok->data[0]);
       }
-    } else { /* 当前char 不是 9种符号 ( { [ ' ` ~ @ ~@ ^ Not a special character */
+    } else { /* 当前char 不是 9种符号 ( { [ ' ` ~ @ ~@ ^ Not a special character
+              */
       return read_atom(reader);
     }
   } else { /* no tokens */
@@ -799,8 +834,7 @@ MalType *read_hashmap(Reader *reader) {
   MalType *retval = read_matched_delimiters(reader, '{', '}');
   if (is_error(retval)) {
     retval = make_error("Reader error: unbalanced braces '{}'");
-  }
-  else if (list_count(retval->value.mal_list) % 2 != 0) {
+  } else if (list_count(retval->value.mal_list) % 2 != 0) {
     retval = make_error("Reader error: missing value in map literal");
   } else {
     retval->type = MALTYPE_HASHMAP;
@@ -808,7 +842,8 @@ MalType *read_hashmap(Reader *reader) {
   return retval;
 }
 // 读取3个匹配的分隔符 () {} []
-MalType *read_matched_delimiters(Reader *reader, char start_delimiter, char end_delimiter) {
+MalType *read_matched_delimiters(Reader *reader, char start_delimiter,
+                                 char end_delimiter) {
   /* TODO: separate implementation of hashmap and vector */
   Token *tok = reader_next(reader);
   list lst = NULL;
@@ -883,9 +918,10 @@ MalType *make_symbol_list(Reader *reader, char *symbol_name) {
 
 Token *token_allocate(char *str, long num_chars, int type, char *error) {
   /* allocate space for the string */
-  char *data = GC_MALLOC(sizeof(*data) * num_chars + 1); /* include space for null byte */
-  strncpy(data, str, num_chars);                         /* copy num_chars characters into data */
-  data[num_chars] = '\0';                                /* manually add the null byte */
+  char *data = GC_MALLOC(sizeof(*data) * num_chars +
+                         1);     /* include space for null byte */
+  strncpy(data, str, num_chars); /* copy num_chars characters into data */
+  data[num_chars] = '\0';        /* manually add the null byte */
   /* allocate space for the token struct */
   Token *token = GC_MALLOC(sizeof(*token));
   token->data = data;
@@ -920,7 +956,7 @@ char *unescape_string(char *str, long length) {
         /* just a '\' symbol so copy it */
         dest[j++] = '\\';
       }
-    } else {  /* not a quote so copy it */
+    } else { /* not a quote so copy it */
       dest[j++] = str[i];
     }
   }
@@ -932,7 +968,8 @@ char *unescape_string(char *str, long length) {
 
 // env.c
 /* Note: caller must make sure enough exprs to match symbols */
-Env *env_make(Env *outer, list symbol_list, list exprs_list, MalType *more_symbol) {
+Env *env_make(Env *outer, list symbol_list, list exprs_list,
+              MalType *more_symbol) {
 
   Env *env = GC_MALLOC(sizeof(*env));
   env->outer = outer;
@@ -967,17 +1004,13 @@ Env *env_find(Env *current, MalType *symbol) {
   }
 }
 
-MalType *env_get(Env *current, MalType *symbol)
-{
+MalType *env_get(Env *current, MalType *symbol) {
 
   Env *env = env_find(current, symbol);
 
-  if (env)
-  {
+  if (env) {
     return hashmap_get(env->data, symbol->value.mal_symbol);
-  }
-  else
-  {
+  } else {
     return make_error_fmt("'%s' not found", symbol->value.mal_symbol);
   }
 }
@@ -1102,7 +1135,8 @@ ns *ns_make_core() {
 
   /* lists */
   core_functions = hashmap_put(core_functions, "list", mal_list);
-  core_functions = hashmap_put(core_functions, "empty?", mal_empty_questionmark);
+  core_functions =
+      hashmap_put(core_functions, "empty?", mal_empty_questionmark);
   core_functions = hashmap_put(core_functions, "count", mal_count);
   core_functions = hashmap_put(core_functions, "cons", mal_cons);
   core_functions = hashmap_put(core_functions, "concat", mal_concat);
@@ -1120,16 +1154,24 @@ ns *ns_make_core() {
   core_functions = hashmap_put(core_functions, "list?", mal_list_questionmark);
   core_functions = hashmap_put(core_functions, "nil?", mal_nil_questionmark);
   core_functions = hashmap_put(core_functions, "true?", mal_true_questionmark);
-  core_functions = hashmap_put(core_functions, "false?", mal_false_questionmark);
-  core_functions = hashmap_put(core_functions, "symbol?", mal_symbol_questionmark);
-  core_functions = hashmap_put(core_functions, "keyword?", mal_keyword_questionmark);
-  core_functions = hashmap_put(core_functions, "vector?", mal_vector_questionmark);
-  core_functions = hashmap_put(core_functions, "sequential?", mal_sequential_questionmark);
+  core_functions =
+      hashmap_put(core_functions, "false?", mal_false_questionmark);
+  core_functions =
+      hashmap_put(core_functions, "symbol?", mal_symbol_questionmark);
+  core_functions =
+      hashmap_put(core_functions, "keyword?", mal_keyword_questionmark);
+  core_functions =
+      hashmap_put(core_functions, "vector?", mal_vector_questionmark);
+  core_functions =
+      hashmap_put(core_functions, "sequential?", mal_sequential_questionmark);
   core_functions = hashmap_put(core_functions, "map?", mal_map_questionmark);
-  core_functions = hashmap_put(core_functions, "string?", mal_string_questionmark);
-  core_functions = hashmap_put(core_functions, "number?", mal_number_questionmark);
+  core_functions =
+      hashmap_put(core_functions, "string?", mal_string_questionmark);
+  core_functions =
+      hashmap_put(core_functions, "number?", mal_number_questionmark);
   core_functions = hashmap_put(core_functions, "fn?", mal_fn_questionmark);
-  core_functions = hashmap_put(core_functions, "macro?", mal_macro_questionmark);
+  core_functions =
+      hashmap_put(core_functions, "macro?", mal_macro_questionmark);
 
   /* atoms */
   core_functions = hashmap_put(core_functions, "atom", mal_atom);
@@ -1150,7 +1192,8 @@ ns *ns_make_core() {
   core_functions = hashmap_put(core_functions, "hash-map", mal_hash_map);
 
   /* hash-maps */
-  core_functions = hashmap_put(core_functions, "contains?", mal_contains_questionmark);
+  core_functions =
+      hashmap_put(core_functions, "contains?", mal_contains_questionmark);
   core_functions = hashmap_put(core_functions, "assoc", mal_assoc);
   core_functions = hashmap_put(core_functions, "dissoc", mal_dissoc);
   core_functions = hashmap_put(core_functions, "get", mal_get);
@@ -1233,8 +1276,7 @@ MalType *mal_sub(list args) {
 
       if (is_integer(val) && !return_float) {
         i_sum = i_sum - val->value.mal_integer;
-      }
-      else if (is_integer(val)) {
+      } else if (is_integer(val)) {
         r_sum = (double)i_sum + r_sum - (double)val->value.mal_integer;
         i_sum = 0;
       } else {
@@ -1415,8 +1457,7 @@ MalType *mal_greaterthan(list args) {
   int cmp = 0;
   if (is_integer(first_val) && is_integer(second_val)) {
     cmp = (first_val->value.mal_integer > second_val->value.mal_integer);
-  }
-  else if (is_integer(first_val) && is_float(second_val)) {
+  } else if (is_integer(first_val) && is_float(second_val)) {
     cmp = (first_val->value.mal_integer > second_val->value.mal_float);
   } else if (is_float(first_val) && is_integer(second_val)) {
     cmp = (first_val->value.mal_float > second_val->value.mal_integer);
@@ -1450,27 +1491,18 @@ MalType *mal_greaterthanorequalto(list args) {
     cmp = (first_val->value.mal_integer >= second_val->value.mal_integer);
   } else if (is_integer(first_val) && is_float(second_val)) {
     cmp = (first_val->value.mal_integer >= second_val->value.mal_float);
-  }
-  else if (is_float(first_val) && is_integer(second_val))
-  {
+  } else if (is_float(first_val) && is_integer(second_val)) {
     cmp = (first_val->value.mal_float >= second_val->value.mal_integer);
-  }
-  else if (is_float(first_val) && is_float(second_val))
-  {
+  } else if (is_float(first_val) && is_float(second_val)) {
     cmp = (first_val->value.mal_float >= second_val->value.mal_float);
-  }
-  else
-  {
+  } else {
     /* shouldn't happen unless new numerical type is added */
     return make_error_fmt("'>=': unknown numerical type");
   }
 
-  if (cmp)
-  {
+  if (cmp) {
     return make_true();
-  }
-  else
-  {
+  } else {
     return make_false();
   }
 }
@@ -1483,74 +1515,56 @@ MalType *mal_equals(list args) {
   MalType *first_val = args->data;
   MalType *second_val = args->next->data;
 
-  if (is_sequential(first_val) && is_sequential(second_val))
-  {
+  if (is_sequential(first_val) && is_sequential(second_val)) {
     return equal_lists(first_val, second_val);
-  }
-  else if (first_val->type != second_val->type)
-  {
+  } else if (first_val->type != second_val->type) {
     return make_false();
-  }
-  else
-  {
+  } else {
 
-    switch (first_val->type)
-    {
+    switch (first_val->type) {
 
     case MALTYPE_INTEGER:
 
-      if (first_val->value.mal_integer == second_val->value.mal_integer)
-      {
+      if (first_val->value.mal_integer == second_val->value.mal_integer) {
         return make_true();
-      }
-      else
-      {
+      } else {
         return make_false();
       }
       break;
 
     case MALTYPE_FLOAT:
 
-      if (first_val->value.mal_float == second_val->value.mal_float)
-      {
+      if (first_val->value.mal_float == second_val->value.mal_float) {
         return make_true();
-      }
-      else
-      {
+      } else {
         return make_false();
       }
       break;
 
     case MALTYPE_SYMBOL:
 
-      if (strcmp(first_val->value.mal_symbol, second_val->value.mal_symbol) == 0)
-      {
+      if (strcmp(first_val->value.mal_symbol, second_val->value.mal_symbol) ==
+          0) {
         return make_true();
-      }
-      else
-      {
+      } else {
         return make_false();
       }
       break;
 
     case MALTYPE_STRING:
-      if (strcmp(first_val->value.mal_string, second_val->value.mal_string) == 0)
-      {
+      if (strcmp(first_val->value.mal_string, second_val->value.mal_string) ==
+          0) {
         return make_true();
-      }
-      else
-      {
+      } else {
         return make_false();
       }
       break;
 
     case MALTYPE_KEYWORD:
-      if (strcmp(first_val->value.mal_keyword, second_val->value.mal_keyword) == 0)
-      {
+      if (strcmp(first_val->value.mal_keyword, second_val->value.mal_keyword) ==
+          0) {
         return make_true();
-      }
-      else
-      {
+      } else {
         return make_false();
       }
       break;
@@ -1568,24 +1582,18 @@ MalType *mal_equals(list args) {
 
     case MALTYPE_FUNCTION:
 
-      if (first_val->value.mal_function == second_val->value.mal_function)
-      {
+      if (first_val->value.mal_function == second_val->value.mal_function) {
         return make_true();
-      }
-      else
-      {
+      } else {
         return make_false();
       }
       break;
 
     case MALTYPE_CLOSURE:
 
-      if (&first_val->value.mal_closure == &second_val->value.mal_closure)
-      {
+      if (&first_val->value.mal_closure == &second_val->value.mal_closure) {
         return make_true();
-      }
-      else
-      {
+      } else {
         return make_false();
       }
       break;
@@ -1594,9 +1602,7 @@ MalType *mal_equals(list args) {
   return make_false();
 }
 
-MalType *mal_list(list args) {
-  return make_list(args);
-}
+MalType *mal_list(list args) { return make_list(args); }
 
 MalType *mal_nth(list args) {
   if (!args || !args->next || args->next->next) {
@@ -1605,16 +1611,20 @@ MalType *mal_nth(list args) {
   MalType *lst = args->data;
   MalType *n = args->next->data;
   if (!is_sequential(lst)) {
-    return make_error_fmt("'nth': first argument is not a list or vector: '%s'\n", pr_str(lst, UNREADABLY));
+    return make_error_fmt(
+        "'nth': first argument is not a list or vector: '%s'\n",
+        pr_str(lst, UNREADABLY));
   }
   if (!is_integer(n)) {
-    return make_error_fmt("'nth': second argument is not an integer: '%s'\n", pr_str(lst, UNREADABLY));
+    return make_error_fmt("'nth': second argument is not an integer: '%s'\n",
+                          pr_str(lst, UNREADABLY));
   }
   MalType *result = list_nth(lst->value.mal_list, n->value.mal_integer);
   if (result) {
     return result;
   } else {
-    return make_error_fmt("'nth': index %s out of bounds for: '%s'\n", pr_str(n, UNREADABLY), pr_str(lst, UNREADABLY));
+    return make_error_fmt("'nth': index %s out of bounds for: '%s'\n",
+                          pr_str(n, UNREADABLY), pr_str(lst, UNREADABLY));
   }
 }
 
@@ -1645,195 +1655,161 @@ MalType *mal_rest(list args) {
   list result = list_rest(lst->value.mal_list);
   if (lst) {
     return make_list(result);
-  }
-  else {
+  } else {
     return make_nil();
   }
 }
 
-MalType *mal_cons(list args)
-{
+MalType *mal_cons(list args) {
 
-  if (!args || (args->next && args->next->next))
-  {
+  if (!args || (args->next && args->next->next)) {
     return make_error("'cons': Expected exactly two arguments");
   }
 
   MalType *lst = args->next->data;
-  if (is_sequential(lst))
-  {
+  if (is_sequential(lst)) {
     return make_list(list_push(lst->value.mal_list, args->data));
-  }
-  else if (is_nil(lst))
-  {
+  } else if (is_nil(lst)) {
     return make_list(list_push(NULL, args->data));
-  }
-  else
-  {
-    return make_error_fmt("'cons': second argument is not a list or vector: '%s'\n",
-                          pr_str(lst, UNREADABLY));
+  } else {
+    return make_error_fmt(
+        "'cons': second argument is not a list or vector: '%s'\n",
+        pr_str(lst, UNREADABLY));
   }
 }
 
-MalType *mal_concat(list args)
-{
+MalType *mal_concat(list args) {
 
   /* return an empty list for no arguments */
-  if (!args)
-  {
+  if (!args) {
     return make_list(NULL);
   }
 
   list new_list = NULL;
-  while (args)
-  {
+  while (args) {
 
     MalType *val = args->data;
 
     /* skip nils */
-    if (is_nil(val))
-    {
+    if (is_nil(val)) {
       args = args->next;
       continue;
     }
     /* concatenate lists and vectors */
-    else if (is_sequential(val))
-    {
+    else if (is_sequential(val)) {
 
       list lst = val->value.mal_list;
       new_list = list_concatenate(new_list, lst);
       args = args->next;
     }
     /* raise an error for any non-sequence types */
-    else
-    {
-      return make_error_fmt("'concat': all arguments must be lists or vectors '%s'",
-                            pr_str(val, UNREADABLY));
+    else {
+      return make_error_fmt(
+          "'concat': all arguments must be lists or vectors '%s'",
+          pr_str(val, UNREADABLY));
     }
   }
   return make_list(new_list);
 }
 
-MalType *mal_count(list args)
-{
+MalType *mal_count(list args) {
 
-  if (args->next)
-  {
+  if (args->next) {
     return make_error_fmt("'count': too many arguments");
   }
 
   MalType *val = args->data;
-  if (!is_sequential(val) && !is_nil(val))
-  {
+  if (!is_sequential(val) && !is_nil(val)) {
     return make_error_fmt("'count': argument is not a list or vector: '%s'\n",
                           pr_str(val, UNREADABLY));
   }
   return make_integer(list_count(val->value.mal_list));
 }
 
-MalType *mal_list_questionmark(list args)
-{
+MalType *mal_list_questionmark(list args) {
 
-  if (args->next)
-  {
+  if (args->next) {
     return make_error_fmt("'list?': too many arguments");
   }
 
   MalType *val = args->data;
-  if (is_list(val))
-  {
+  if (is_list(val)) {
     return make_true();
-  }
-  else
-  {
+  } else {
     return make_false();
   }
 }
 
-MalType *mal_empty_questionmark(list args)
-{
+MalType *mal_empty_questionmark(list args) {
 
-  if (args->next)
-  {
+  if (args->next) {
     return make_error_fmt("'empty?': too many arguments");
   }
 
   MalType *val = args->data;
-  if (!is_sequential(val))
-  {
-    return make_error_fmt("'empty?': argument is not a list or vector: '%s'\n", pr_str(val, UNREADABLY));
+  if (!is_sequential(val)) {
+    return make_error_fmt("'empty?': argument is not a list or vector: '%s'\n",
+                          pr_str(val, UNREADABLY));
   }
 
-  if (!val->value.mal_list)
-  {
+  if (!val->value.mal_list) {
     return make_true();
-  }
-  else
-  {
+  } else {
     return make_false();
   }
 }
 
-MalType *mal_pr_str(list args)
-{
+MalType *mal_pr_str(list args) {
   /* Accepts any number and type of arguments */
   return as_str(args, READABLY, " ");
 }
 
-MalType *mal_str(list args)
-{
+MalType *mal_str(list args) {
   /* Accepts any number and type of arguments */
   return as_str(args, UNREADABLY, "");
 }
 
-MalType *mal_prn(list args)
-{
+MalType *mal_prn(list args) {
   /* Accepts any number and type of arguments */
   return print(args, READABLY, " ");
 }
 
-MalType *mal_println(list args)
-{
+MalType *mal_println(list args) {
   /* Accepts any number and type of arguments */
   return print(args, UNREADABLY, " ");
 }
 
-MalType *mal_read_string(list args)
-{
+MalType *mal_read_string(list args) {
 
-  if (!args || args->next)
-  {
+  if (!args || args->next) {
     return make_error_fmt("'read-string': expected exactly one argument");
   }
 
   MalType *val = args->data;
-  if (!is_string(val))
-  {
-    return make_error_fmt("'read-string': expected a string argument '%s'", pr_str(val, UNREADABLY));
+  if (!is_string(val)) {
+    return make_error_fmt("'read-string': expected a string argument '%s'",
+                          pr_str(val, UNREADABLY));
   }
   return read_str(val->value.mal_string);
 }
 
-MalType *mal_slurp(list args)
-{
+MalType *mal_slurp(list args) {
 
-  if (args->next)
-  {
+  if (args->next) {
     return make_error_fmt("'slurp': too many arguments");
   }
 
   MalType *filename = args->data;
-  if (!is_string(filename))
-  {
+  if (!is_string(filename)) {
     return make_error_fmt("'slurp': expected a string argument");
   }
 
   long file_length = 0;
   FILE *file = fopen(filename->value.mal_string, "rb");
 
-  if (!file)
-  {
-    return make_error_fmt("'slurp': file not found '%s'", pr_str(filename, UNREADABLY));
+  if (!file) {
+    return make_error_fmt("'slurp': file not found '%s'",
+                          pr_str(filename, UNREADABLY));
   }
 
   fseek(file, 0, SEEK_END);
@@ -1841,9 +1817,9 @@ MalType *mal_slurp(list args)
   fseek(file, 0, SEEK_SET);
 
   char *buffer = (char *)GC_MALLOC(sizeof(*buffer) * file_length + 1);
-  if (file_length != fread(buffer, sizeof(*buffer), file_length, file))
-  {
-    return make_error_fmt("'slurp': failed to read file '%s'", pr_str(filename, UNREADABLY));
+  if (file_length != fread(buffer, sizeof(*buffer), file_length, file)) {
+    return make_error_fmt("'slurp': failed to read file '%s'",
+                          pr_str(filename, UNREADABLY));
   }
 
   fclose(file);
@@ -1852,11 +1828,9 @@ MalType *mal_slurp(list args)
   return make_string(buffer);
 }
 
-MalType *mal_atom(list args)
-{
+MalType *mal_atom(list args) {
 
-  if (!args || args->next)
-  {
+  if (!args || args->next) {
     return make_error_fmt("'atom': expected exactly one argument");
   }
 
@@ -1864,78 +1838,68 @@ MalType *mal_atom(list args)
   return make_atom(val);
 }
 
-MalType *mal_atom_questionmark(list args)
-{
+MalType *mal_atom_questionmark(list args) {
 
-  if (!args || args->next)
-  {
+  if (!args || args->next) {
     return make_error_fmt("'atom?': expected exactly one argument");
   }
 
   MalType *val = args->data;
 
-  if (is_atom(val))
-  {
+  if (is_atom(val)) {
     return make_true();
-  }
-  else
-  {
+  } else {
     return make_false();
   }
 }
 
-MalType *mal_deref(list args)
-{
+MalType *mal_deref(list args) {
 
-  if (!args || args->next)
-  {
+  if (!args || args->next) {
     return make_error_fmt("'deref': expected exactly one argument");
   }
 
   MalType *val = args->data;
 
-  if (!is_atom(val))
-  {
-    return make_error_fmt("'deref': value is not an atom '%s'", pr_str(val, UNREADABLY));
+  if (!is_atom(val)) {
+    return make_error_fmt("'deref': value is not an atom '%s'",
+                          pr_str(val, UNREADABLY));
   }
 
   return val->value.mal_atom;
 }
 
-MalType *mal_reset_bang(list args)
-{
+MalType *mal_reset_bang(list args) {
 
-  if (!args || args->next->next)
-  {
+  if (!args || args->next->next) {
     return make_error_fmt("'reset!': expected exactly two arguments");
   }
 
   MalType *val = args->data;
 
-  if (!is_atom(val))
-  {
-    return make_error_fmt("'reset!': value is not an atom '%s'", pr_str(val, UNREADABLY));
+  if (!is_atom(val)) {
+    return make_error_fmt("'reset!': value is not an atom '%s'",
+                          pr_str(val, UNREADABLY));
   }
 
   val->value.mal_atom = args->next->data;
   return args->next->data;
 }
 
-MalType *mal_swap_bang(list args)
-{
+MalType *mal_swap_bang(list args) {
 
   MalType *val = args->data;
 
-  if (!is_atom(val))
-  {
-    return make_error_fmt("'swap!': first argument is not an atom '%s'", pr_str(val, UNREADABLY));
+  if (!is_atom(val)) {
+    return make_error_fmt("'swap!': first argument is not an atom '%s'",
+                          pr_str(val, UNREADABLY));
   }
 
   MalType *fn = args->next->data;
 
-  if (!is_callable(fn))
-  {
-    return make_error_fmt("'swap!': second argument is not callable '%s'", pr_str(fn, UNREADABLY));
+  if (!is_callable(fn)) {
+    return make_error_fmt("'swap!': second argument is not callable '%s'",
+                          pr_str(fn, UNREADABLY));
   }
 
   list fn_args = args->next->next;
@@ -1943,71 +1907,57 @@ MalType *mal_swap_bang(list args)
 
   MalType *result = apply(fn, fn_args);
 
-  if (is_error(result))
-  {
+  if (is_error(result)) {
     return result;
-  }
-  else
-  {
+  } else {
     val->value.mal_atom = result;
     return result;
   }
 }
 
-MalType *mal_throw(list args)
-{
+MalType *mal_throw(list args) {
 
-  if (!args || args->next)
-  {
+  if (!args || args->next) {
     return make_error_fmt("'throw': expected exactly one argument");
   }
 
   MalType *val = args->data;
 
   /* re-throw an existing exception */
-  if (is_error(val))
-  {
+  if (is_error(val)) {
     return val;
   }
   /* create a new exception */
-  else
-  {
+  else {
     return wrap_error(val);
   }
 }
 
-MalType *mal_apply(list args)
-{
+MalType *mal_apply(list args) {
 
-  if (!args || !args->next)
-  {
+  if (!args || !args->next) {
     return make_error("'apply': expected at least two arguments");
   }
 
   MalType *func = args->data;
 
-  if (!is_callable(func))
-  {
+  if (!is_callable(func)) {
     return make_error("'apply': first argument must be callable");
   }
 
   /* assemble loose arguments */
   args = args->next;
   list lst = NULL;
-  while (args->next)
-  {
+  while (args->next) {
     lst = list_push(lst, args->data);
     args = args->next;
   }
 
   MalType *final = args->data;
 
-  if (is_sequential(final))
-  {
+  if (is_sequential(final)) {
     lst = list_concatenate(list_reverse(lst), final->value.mal_list);
-  }
-  else
-  {
+  } else {
     lst = list_push(lst, final);
     lst = list_reverse(lst);
   }
@@ -2015,43 +1965,35 @@ MalType *mal_apply(list args)
   return apply(func, lst);
 }
 
-MalType *mal_map(list args)
-{
+MalType *mal_map(list args) {
 
-  if (!args || !args->next || args->next->next)
-  {
+  if (!args || !args->next || args->next->next) {
     return make_error("'map': expected two arguments");
   }
 
   MalType *func = args->data;
 
-  if (!is_callable(func))
-  {
+  if (!is_callable(func)) {
     return make_error("'map': first argument must be a function");
   }
 
   MalType *arg = args->next->data;
 
-  if (!is_sequential(arg))
-  {
+  if (!is_sequential(arg)) {
     return make_error("'map': second argument must be a list or vector");
   }
 
   list arg_list = arg->value.mal_list;
   list result_list = NULL;
 
-  while (arg_list)
-  {
+  while (arg_list) {
 
     MalType *result = apply(func, list_make(arg_list->data));
 
     /* early return if error */
-    if (is_error(result))
-    {
+    if (is_error(result)) {
       return result;
-    }
-    else
-    {
+    } else {
       result_list = list_push(result_list, result);
     }
     arg_list = arg_list->next;
@@ -2059,160 +2001,122 @@ MalType *mal_map(list args)
   return make_list(list_reverse(result_list));
 }
 
-MalType *mal_nil_questionmark(list args)
-{
+MalType *mal_nil_questionmark(list args) {
 
-  if (!args || args->next)
-  {
+  if (!args || args->next) {
     return make_error("'nil?': expected a single argument");
   }
 
   MalType *val = args->data;
 
-  if (is_nil(val))
-  {
+  if (is_nil(val)) {
     return make_true();
-  }
-  else
-  {
+  } else {
     return make_false();
   }
 }
 
-MalType *mal_true_questionmark(list args)
-{
+MalType *mal_true_questionmark(list args) {
 
-  if (!args || args->next)
-  {
+  if (!args || args->next) {
     return make_error("'true?': expected a single argument");
   }
 
   MalType *val = args->data;
 
-  if (is_true(val))
-  {
+  if (is_true(val)) {
     return make_true();
-  }
-  else
-  {
+  } else {
     return make_false();
   }
 }
 
-MalType *mal_false_questionmark(list args)
-{
+MalType *mal_false_questionmark(list args) {
 
-  if (!args || args->next)
-  {
+  if (!args || args->next) {
     return make_error("'false?': expected a single argument");
   }
 
   MalType *val = args->data;
 
-  if (is_false(val))
-  {
+  if (is_false(val)) {
     return make_true();
-  }
-  else
-  {
+  } else {
     return make_false();
   }
 }
 
-MalType *mal_symbol_questionmark(list args)
-{
+MalType *mal_symbol_questionmark(list args) {
 
-  if (!args || args->next)
-  {
+  if (!args || args->next) {
     return make_error("'symbol?': expected a single argument");
   }
 
   MalType *val = args->data;
 
-  if (is_symbol(val))
-  {
+  if (is_symbol(val)) {
     return make_true();
-  }
-  else
-  {
+  } else {
     return make_false();
   }
 }
 
-MalType *mal_symbol(list args)
-{
+MalType *mal_symbol(list args) {
 
-  if (!args || args->next)
-  {
+  if (!args || args->next) {
     return make_error("'symbol': expected a single argument");
   }
 
   MalType *val = args->data;
 
-  if (!is_string(val))
-  {
+  if (!is_string(val)) {
     return make_error("'symbol': expected a string argument");
-  }
-  else
-  {
+  } else {
     return make_symbol(val->value.mal_string);
   }
 }
 
-MalType *mal_keyword(list args)
-{
+MalType *mal_keyword(list args) {
 
-  if (!args || args->next)
-  {
+  if (!args || args->next) {
     return make_error("'keyword': expected a single argument");
   }
 
   MalType *val = args->data;
 
-  if (!is_string(val) && !is_keyword(val))
-  {
+  if (!is_string(val) && !is_keyword(val)) {
     return make_error("'keyword': expected a string argument");
-  }
-  else
-  {
+  } else {
     return make_keyword(val->value.mal_string);
   }
 }
 
-MalType *mal_keyword_questionmark(list args)
-{
+MalType *mal_keyword_questionmark(list args) {
 
-  if (!args || args->next)
-  {
+  if (!args || args->next) {
     return make_error("'keyword?': expected a single argument");
   }
 
   MalType *val = args->data;
 
-  if (is_keyword(val))
-  {
+  if (is_keyword(val)) {
     return make_true();
-  }
-  else
-  {
+  } else {
     return make_false();
   }
 }
 
-MalType *mal_vec(list args)
-{
+MalType *mal_vec(list args) {
 
   /* Accepts a single argument */
 
-  if (!args || args->next)
-  {
+  if (!args || args->next) {
     return make_error("'vec': expected a single argument");
   }
 
   MalType *val = args->data;
 
-  if (!is_vector(val) && !is_list(val) && !is_hashmap(val))
-  {
+  if (!is_vector(val) && !is_list(val) && !is_hashmap(val)) {
     return make_error("'vec': expected a vector, list or hashmap");
   }
 
@@ -2222,68 +2126,54 @@ MalType *mal_vec(list args)
   return new_val;
 }
 
-MalType *mal_vector(list args)
-{
+MalType *mal_vector(list args) {
   /* Accepts any number and type of arguments */
   return make_vector(args);
 }
 
-MalType *mal_vector_questionmark(list args)
-{
+MalType *mal_vector_questionmark(list args) {
 
-  if (!args || args->next)
-  {
+  if (!args || args->next) {
     return make_error("'vector?': expected a single argument");
   }
 
   MalType *val = args->data;
 
-  if (is_vector(val))
-  {
+  if (is_vector(val)) {
     return make_true();
-  }
-  else
-  {
+  } else {
     return make_false();
   }
 }
 
-MalType *mal_sequential_questionmark(list args)
-{
+MalType *mal_sequential_questionmark(list args) {
 
-  if (!args || args->next)
-  {
+  if (!args || args->next) {
     return make_error("'sequential?': expected a single argument");
   }
 
   MalType *val = args->data;
 
-  if (is_sequential(val))
-  {
+  if (is_sequential(val)) {
     return make_true();
-  }
-  else
-  {
+  } else {
     return make_false();
   }
 }
 
-MalType *mal_hash_map(list args)
-{
+MalType *mal_hash_map(list args) {
 
-  if (args && list_count(args) % 2 == 1)
-  {
-    return make_error("'hashmap': odd number of arguments, expected key/value pairs");
+  if (args && list_count(args) % 2 == 1) {
+    return make_error(
+        "'hashmap': odd number of arguments, expected key/value pairs");
   }
 
   list args_iterator = args;
-  while (args_iterator)
-  {
+  while (args_iterator) {
 
     MalType *val = args_iterator->data;
 
-    if (!is_keyword(val) && !is_string(val) && !is_symbol(val))
-    {
+    if (!is_keyword(val) && !is_string(val) && !is_symbol(val)) {
       return make_error("'hashmap': keys must be keywords, symbols or strings");
     }
     args_iterator = args_iterator->next;
@@ -2293,115 +2183,96 @@ MalType *mal_hash_map(list args)
   return make_hashmap(args);
 }
 
-MalType *mal_map_questionmark(list args)
-{
+MalType *mal_map_questionmark(list args) {
 
-  if (!args || args->next)
-  {
+  if (!args || args->next) {
     return make_error("'map?': expected a single argument");
   }
 
   MalType *val = args->data;
 
-  if (is_hashmap(val))
-  {
+  if (is_hashmap(val)) {
     return make_true();
-  }
-  else
-  {
+  } else {
     return make_false();
   }
 }
 
-MalType *mal_get(list args)
-{
+MalType *mal_get(list args) {
   /* TODO: implement a proper hashmap */
 
-  if (!args || args->next->next)
-  {
+  if (!args || args->next->next) {
     return make_error("'get': expected exactly two arguments");
   }
 
   MalType *map = args->data;
 
-  if (!is_hashmap(map) && !is_nil(map))
-  {
+  if (!is_hashmap(map) && !is_nil(map)) {
     return make_error("'get': expected a map for the first argument");
   }
 
-  MalType *result = hashmap_getf(map->value.mal_list, get_fn(args->next->data), get_fn);
+  MalType *result =
+      hashmap_getf(map->value.mal_list, get_fn(args->next->data), get_fn);
 
-  if (!result)
-  {
+  if (!result) {
     return make_nil();
   }
 
   return result;
 }
 
-MalType *mal_contains_questionmark(list args)
-{
+MalType *mal_contains_questionmark(list args) {
 
-  if (!args || args->next->next)
-  {
+  if (!args || args->next->next) {
     return make_error("'contains?': expected exactly two arguments");
   }
 
   MalType *map = args->data;
 
-  if (!is_hashmap(map))
-  {
+  if (!is_hashmap(map)) {
     return make_error("'contains?': expected a map for the first argument");
   }
 
-  MalType *result = hashmap_getf(map->value.mal_list, get_fn(args->next->data), get_fn);
+  MalType *result =
+      hashmap_getf(map->value.mal_list, get_fn(args->next->data), get_fn);
 
-  if (!result)
-  {
+  if (!result) {
     return make_false();
-  }
-  else
-  {
+  } else {
     return make_true();
   }
 }
 
-MalType *mal_assoc(list args)
-{
+MalType *mal_assoc(list args) {
 
-  if (!args || !args->next || !args->next->next)
-  {
+  if (!args || !args->next || !args->next->next) {
     return make_error("'assoc': expected at least three arguments");
   }
 
   MalType *map = args->data;
 
-  if (!is_hashmap(map))
-  {
+  if (!is_hashmap(map)) {
     return make_error("'assoc': expected a map for the first argument");
   }
 
-  if (list_count(args->next) % 2 != 0)
-  {
+  if (list_count(args->next) % 2 != 0) {
     return make_error("'assoc': expected even number of key/value pairs");
   }
 
   list new_lst = list_reverse(list_copy(map->value.mal_list));
   args = args->next;
 
-  while (args)
-  {
+  while (args) {
 
     /* try to update copy in-place */
-    hashmap result = hashmap_updatef(new_lst, get_fn(args->data), args->next->data, get_fn);
+    hashmap result =
+        hashmap_updatef(new_lst, get_fn(args->data), args->next->data, get_fn);
 
-    if (result)
-    {
+    if (result) {
       new_lst = result;
     }
     /* add a new key/value pair */
-    else
-    {
+    else {
       new_lst = list_push(new_lst, args->next->data);
       new_lst = list_push(new_lst, args->data);
     }
@@ -2410,18 +2281,15 @@ MalType *mal_assoc(list args)
   return make_hashmap(new_lst);
 }
 
-MalType *mal_dissoc(list args)
-{
+MalType *mal_dissoc(list args) {
 
-  if (!args || !args->next)
-  {
+  if (!args || !args->next) {
     return make_error("'dissoc': expected at least two arguments");
   }
 
   MalType *map = args->data;
 
-  if (!is_hashmap(map))
-  {
+  if (!is_hashmap(map)) {
     return make_error("'dissoc': expected a map for the first argument");
   }
 
@@ -2429,30 +2297,26 @@ MalType *mal_dissoc(list args)
   list new_list = NULL;
   args = args->next;
 
-  while (source_list)
-  {
+  while (source_list) {
 
     list dis_args = args;
     long dis = 0;
 
-    while (dis_args)
-    {
+    while (dis_args) {
 
       list tmp = NULL;
       tmp = list_push(tmp, source_list->data);
       tmp = list_push(tmp, dis_args->data);
       MalType *cmp = mal_equals(tmp);
 
-      if (is_true(cmp))
-      {
+      if (is_true(cmp)) {
         dis = 1;
         break;
       }
       dis_args = dis_args->next;
     }
 
-    if (!dis)
-    {
+    if (!dis) {
       new_list = list_push(new_list, source_list->data);
       new_list = list_push(new_list, source_list->next->data);
     }
@@ -2462,30 +2326,25 @@ MalType *mal_dissoc(list args)
   return make_hashmap(list_reverse(new_list));
 }
 
-MalType *mal_keys(list args)
-{
+MalType *mal_keys(list args) {
 
-  if (!args || args->next)
-  {
+  if (!args || args->next) {
     return make_error("'keys': expected exactly one argument");
   }
 
   MalType *map = args->data;
 
-  if (!is_hashmap(map))
-  {
+  if (!is_hashmap(map)) {
     return make_error("'keys': expected a map");
   }
 
   list lst = map->value.mal_list;
-  if (!lst)
-  {
+  if (!lst) {
     return make_list(NULL);
   }
 
   list result = list_make(lst->data);
-  while (lst->next->next)
-  {
+  while (lst->next->next) {
 
     lst = lst->next->next;
     result = list_push(result, lst->data);
@@ -2493,31 +2352,26 @@ MalType *mal_keys(list args)
   return make_list(result);
 }
 
-MalType *mal_vals(list args)
-{
+MalType *mal_vals(list args) {
 
-  if (!args || args->next)
-  {
+  if (!args || args->next) {
     return make_error("'vals': expected exactly one argument");
   }
 
   MalType *map = args->data;
 
-  if (!is_hashmap(map))
-  {
+  if (!is_hashmap(map)) {
     return make_error("'vals': expected a map");
   }
 
   list lst = map->value.mal_list;
-  if (!lst)
-  {
+  if (!lst) {
     return make_list(NULL);
   }
 
   lst = lst->next;
   list result = list_make(lst->data);
-  while (lst->next)
-  {
+  while (lst->next) {
 
     lst = lst->next->next;
     result = list_push(result, lst->data);
@@ -2525,88 +2379,67 @@ MalType *mal_vals(list args)
   return make_list(result);
 }
 
-MalType *mal_string_questionmark(list args)
-{
+MalType *mal_string_questionmark(list args) {
 
-  if (!args || args->next)
-  {
+  if (!args || args->next) {
     return make_error("'string?': expected a single argument");
   }
 
   MalType *val = args->data;
 
-  if (is_string(val))
-  {
+  if (is_string(val)) {
     return make_true();
-  }
-  else
-  {
+  } else {
     return make_false();
   }
 }
 
-MalType *mal_number_questionmark(list args)
-{
+MalType *mal_number_questionmark(list args) {
 
-  if (!args || args->next)
-  {
+  if (!args || args->next) {
     return make_error("'number?': expected a single argument");
   }
 
   MalType *val = args->data;
 
-  if (is_number(val))
-  {
+  if (is_number(val)) {
     return make_true();
-  }
-  else
-  {
+  } else {
     return make_false();
   }
 }
 
-MalType *mal_fn_questionmark(list args)
-{
+MalType *mal_fn_questionmark(list args) {
 
-  if (!args || args->next)
-  {
+  if (!args || args->next) {
     return make_error("'fn?': expected a single argument");
   }
 
   MalType *val = args->data;
 
-  if (is_callable(val) && !is_macro(val))
-  {
+  if (is_callable(val) && !is_macro(val)) {
     return make_true();
-  }
-  else
-  {
+  } else {
     return make_false();
   }
 }
 
-MalType *mal_macro_questionmark(list args)
-{
+MalType *mal_macro_questionmark(list args) {
 
-  if (!args || args->next)
-  {
+  if (!args || args->next) {
     return make_error("'macro?': expected a single argument");
   }
 
   MalType *val = args->data;
 
-  if (is_macro(val))
-  {
+  if (is_macro(val)) {
     return make_true();
-  }
-  else
-  {
+  } else {
     return make_false();
   }
 }
 
-MalType *mal_time_ms(list args)
-{
+MalType *mal_time_ms(list args) {
 
   struct timeval tv;
   gettimeofday(&tv, NULL);
@@ -2615,39 +2448,33 @@ MalType *mal_time_ms(list args)
   return make_float(ms);
 }
 
-MalType *mal_conj(list args)
-{
+MalType *mal_conj(list args) {
 
-  if (!args || !args->next)
-  {
+  if (!args || !args->next) {
     return make_error("'conj': Expected at least two arguments");
   }
 
   MalType *lst = args->data;
 
-  if (!is_sequential(lst))
-  {
-    return make_error_fmt("'conj': first argument is not a list or vector: '%s'\n",
-                          pr_str(lst, UNREADABLY));
+  if (!is_sequential(lst)) {
+    return make_error_fmt(
+        "'conj': first argument is not a list or vector: '%s'\n",
+        pr_str(lst, UNREADABLY));
   }
   list rest = args->next;
-  if (is_list(lst))
-  {
+  if (is_list(lst)) {
     list new_lst = list_reverse(list_copy(lst->value.mal_list));
-    while (rest)
-    {
+    while (rest) {
       new_lst = list_push(new_lst, rest->data);
       rest = rest->next;
     }
     return make_list(new_lst);
-  }
-  else /* is_vector(lst) */
+  } else /* is_vector(lst) */
   {
 
     list new_lst = list_copy(lst->value.mal_list);
 
-    while (rest)
-    {
+    while (rest) {
       new_lst = list_push(new_lst, rest->data);
       rest = rest->next;
     }
@@ -2684,8 +2511,7 @@ MalType *mal_seq(list args) {
       }
       return make_list(list_reverse(lst));
     }
-  }
-  else if (is_nil(val)) {
+  } else if (is_nil(val)) {
     return make_nil();
   } else {
     return make_error("'seq': expected a list, vector or string");
@@ -2706,7 +2532,7 @@ MalType *mal_meta(list args) {
     return val->metadata;
   }
 }
-// 哮天犬  旺旺碎冰冰 
+// 哮天犬  旺旺碎冰冰
 MalType *mal_with_meta(list args) {
   if (!args || !args->next || args->next->next) {
     return make_error("'with-meta': expected exactly two arguments");
@@ -2840,7 +2666,8 @@ char *get_fn(gptr data) {
 
 //  printer.c
 char *pr_str(MalType *val, int readably) {
-  if (!val) return "";
+  if (!val)
+    return "";
   switch (val->type) {
   case MALTYPE_SYMBOL:
     return snprintfbuf(SYMBOL_BUFFER_SIZE, "%s", val->value.mal_symbol);
@@ -2856,7 +2683,8 @@ char *pr_str(MalType *val, int readably) {
     break;
   case MALTYPE_STRING:
     if (readably) {
-      return snprintfbuf(STRING_BUFFER_SIZE, "%s", escape_string(val->value.mal_string));
+      return snprintfbuf(STRING_BUFFER_SIZE, "%s",
+                         escape_string(val->value.mal_string));
     } else {
       return snprintfbuf(STRING_BUFFER_SIZE, "%s", val->value.mal_string);
     }
@@ -2894,45 +2722,46 @@ char *pr_str(MalType *val, int readably) {
 
   case MALTYPE_FUNCTION:
 
-    return snprintfbuf(FUNCTION_BUFFER_SIZE, "#<function::native@%p>", val->value.mal_function);
+    return snprintfbuf(FUNCTION_BUFFER_SIZE, "#<function::native@%p>",
+                       val->value.mal_function);
     break;
 
-  case MALTYPE_CLOSURE:
-  {
+  case MALTYPE_CLOSURE: {
     MalType *definition = (val->value.mal_closure)->definition;
     MalType *parameters = (val->value.mal_closure)->parameters;
     MalType *more_symbol = (val->value.mal_closure)->more_symbol;
 
     list lst = parameters->value.mal_list;
 
-    if (more_symbol)
-    {
+    if (more_symbol) {
       lst = list_reverse(lst);
-      lst = list_push(lst, make_symbol(snprintfbuf(STRING_BUFFER_SIZE, "%s%s", "&", more_symbol->value.mal_symbol)));
+      lst = list_push(lst,
+                      make_symbol(snprintfbuf(STRING_BUFFER_SIZE, "%s%s", "&",
+                                              more_symbol->value.mal_symbol)));
       lst = list_reverse(lst);
     }
 
-    if (val->is_macro)
-    {
-      return snprintfbuf(FUNCTION_BUFFER_SIZE, "#<function::macro: (fn* %s %s))",
-                         pr_str(make_list(lst), UNREADABLY), pr_str(definition, UNREADABLY));
+    if (val->is_macro) {
+      return snprintfbuf(
+          FUNCTION_BUFFER_SIZE, "#<function::macro: (fn* %s %s))",
+          pr_str(make_list(lst), UNREADABLY), pr_str(definition, UNREADABLY));
+    } else {
+      return snprintfbuf(
+          FUNCTION_BUFFER_SIZE, "#<function::closure: (fn* %s %s))",
+          pr_str(make_list(lst), UNREADABLY), pr_str(definition, UNREADABLY));
     }
-    else
-    {
-      return snprintfbuf(FUNCTION_BUFFER_SIZE, "#<function::closure: (fn* %s %s))",
-                         pr_str(make_list(lst), UNREADABLY), pr_str(definition, UNREADABLY));
-    }
-  }
-  break;
+  } break;
 
   case MALTYPE_ATOM:
 
-    return snprintfbuf(STRING_BUFFER_SIZE, "(atom %s)", pr_str(val->value.mal_atom, readably));
+    return snprintfbuf(STRING_BUFFER_SIZE, "(atom %s)",
+                       pr_str(val->value.mal_atom, readably));
     break;
 
   case MALTYPE_ERROR:
 
-    return snprintfbuf(STRING_BUFFER_SIZE, "Uncaught error: %s", pr_str(val->value.mal_error, UNREADABLY));
+    return snprintfbuf(STRING_BUFFER_SIZE, "Uncaught error: %s",
+                       pr_str(val->value.mal_error, UNREADABLY));
     break;
 
   default:
@@ -2942,7 +2771,8 @@ char *pr_str(MalType *val, int readably) {
   }
 }
 
-char *pr_str_list(list lst, int readably, char *start_delimiter, char *end_delimiter, char *separator) {
+char *pr_str_list(list lst, int readably, char *start_delimiter,
+                  char *end_delimiter, char *separator) {
   char *list_buffer = GC_MALLOC(sizeof(*list_buffer) * LIST_BUFFER_SIZE);
   long buffer_length = LIST_BUFFER_SIZE;
 
@@ -2966,13 +2796,11 @@ char *pr_str_list(list lst, int readably, char *start_delimiter, char *end_delim
     }
     strncat(list_buffer, str, len);
     lst = lst->next;
-    if (lst)
-    {
+    if (lst) {
       len = strlen(separator);
       count += len;
 
-      if (count >= buffer_length)
-      {
+      if (count >= buffer_length) {
         buffer_length += (count + 1);
         list_buffer = GC_REALLOC(list_buffer, buffer_length);
       }
@@ -2981,8 +2809,7 @@ char *pr_str_list(list lst, int readably, char *start_delimiter, char *end_delim
     }
   }
 
-  if (count >= buffer_length)
-  {
+  if (count >= buffer_length) {
     len = strlen(end_delimiter);
     count += len;
 
@@ -2996,9 +2823,10 @@ char *pr_str_list(list lst, int readably, char *start_delimiter, char *end_delim
   return list_buffer;
 }
 
-// 转义 
+// 转义
 char *escape_string(char *str) {
-  long buffer_length = 2 * (strlen(str) + 1); /* allocate a reasonable initial buffer size */
+  long buffer_length =
+      2 * (strlen(str) + 1); /* allocate a reasonable initial buffer size */
   char *buffer = GC_MALLOC(sizeof(*buffer) * buffer_length);
   strcpy(buffer, "\"");
   char *curr = str;
@@ -3031,7 +2859,8 @@ char *escape_string(char *str) {
 }
 
 char *snprintfbuf(long initial_size, char *fmt, ...) {
-  /* this is just a wrapper for the *printf family that ensures the string is long enough to hold the contents */
+  /* this is just a wrapper for the *printf family that ensures the string is
+   * long enough to hold the contents */
   va_list argptr;
   va_start(argptr, fmt);
   char *buffer = GC_MALLOC(sizeof(*buffer) * initial_size);
@@ -3050,9 +2879,7 @@ char *snprintfbuf(long initial_size, char *fmt, ...) {
 //  hashmap.c
 // end hashmap.c
 // a_mal.c
-MalType *READ(char *str) {
-  return read_str(str);
-}
+MalType *READ(char *str) { return read_str(str); }
 
 /* forward references */
 MalType *eval_ast(MalType *ast, Env *env);
@@ -3072,16 +2899,22 @@ void eval_try(MalType **ast, Env **env);
 MalType *EVAL(MalType *ast, Env *env) {
   /* Use goto to jump here rather than calling eval for tail-call elimination */
 TCE_entry_point:
-  if (!ast) { return make_nil(); }
+  if (!ast) {
+    return make_nil();
+  }
 
   ast = macroexpand(ast, env);
-  if (is_error(ast)) { return ast; }
+  if (is_error(ast)) {
+    return ast;
+  }
   /* not a list */
   if (!is_list(ast)) {
     return eval_ast(ast, env);
   }
   /* empty list */
-  if (ast->value.mal_list == NULL) { return ast; }
+  if (ast->value.mal_list == NULL) {
+    return ast;
+  }
   /* list */
   MalType *first = (ast->value.mal_list)->data;
   char *symbol = first->value.mal_symbol;
@@ -3124,21 +2957,14 @@ TCE_entry_point:
 
       list lst = ast->value.mal_list;
       return eval_quasiquote(make_list(lst));
-    }
-    else if (strcmp(symbol, SYMBOL_DEFMACROBANG) == 0)
-    {
+    } else if (strcmp(symbol, SYMBOL_DEFMACROBANG) == 0) {
       return eval_defmacrobang(ast, &env);
-    }
-    else if (strcmp(symbol, SYMBOL_MACROEXPAND) == 0)
-    {
+    } else if (strcmp(symbol, SYMBOL_MACROEXPAND) == 0) {
       return eval_macroexpand(ast, env);
-    }
-    else if (strcmp(symbol, SYMBOL_TRYSTAR) == 0)
-    {
+    } else if (strcmp(symbol, SYMBOL_TRYSTAR) == 0) {
       /* TCE - modify ast and env directly and jump back to eval */
       eval_try(&ast, &env);
-      if (is_error(ast))
-      {
+      if (is_error(ast)) {
         return ast;
       }
       goto TCE_entry_point;
@@ -3147,8 +2973,7 @@ TCE_entry_point:
   /* first element is not a special symbol */
   MalType *evaluated_list = eval_ast(ast, env);
 
-  if (is_error(evaluated_list))
-  {
+  if (is_error(evaluated_list)) {
     return evaluated_list;
   }
 
@@ -3156,12 +2981,9 @@ TCE_entry_point:
   list evlst = evaluated_list->value.mal_list;
   MalType *func = evlst->data;
 
-  if (is_function(func))
-  {
+  if (is_function(func)) {
     return (*func->value.mal_function)(evlst->next);
-  }
-  else if (is_closure(func))
-  {
+  } else if (is_closure(func)) {
 
     MalClosure *closure = func->value.mal_closure;
     list params = (closure->parameters)->value.mal_list;
@@ -3169,29 +2991,22 @@ TCE_entry_point:
     long param_count = list_count(params);
     long arg_count = list_count(evlst->next);
 
-    if (param_count > arg_count)
-    {
+    if (param_count > arg_count) {
       return make_error("too few arguments supplied to function");
-    }
-    else if ((param_count < arg_count) && !closure->more_symbol)
-    {
+    } else if ((param_count < arg_count) && !closure->more_symbol) {
       return make_error("too many arguments supplied to function");
-    }
-    else
-    {
+    } else {
       /* TCE - modify ast and env directly and jump back to eval */
       env = env_make(closure->env, params, evlst->next, closure->more_symbol);
       ast = func->value.mal_closure->definition;
-      if (is_error(ast))
-      {
+      if (is_error(ast)) {
         return ast;
       }
       goto TCE_entry_point;
     }
-  }
-  else
-  {
-    return make_error_fmt("first item in list is not callable: '%s'", pr_str(func, UNREADABLY));
+  } else {
+    return make_error_fmt("first item in list is not callable: '%s'",
+                          pr_str(func, UNREADABLY));
   }
 }
 
@@ -3200,9 +3015,7 @@ void PRINT(MalType *val) {
   printf("%s\n", output);
 }
 
-void rep(char *str, Env *env) {
-  PRINT(EVAL(READ(str), env));
-}
+void rep(char *str, Env *env) { PRINT(EVAL(READ(str), env)); }
 
 /* declare as global so it can be accessed by mal_eval */
 Env *global_env;
@@ -3218,14 +3031,14 @@ MalType *mal_readline(list args) {
   }
   MalType *prompt = args->data;
   if (!is_string(prompt)) {
-    return make_error_fmt("'readline': argument is not a string '%s'", pr_str(prompt, UNREADABLY));
+    return make_error_fmt("'readline': argument is not a string '%s'",
+                          pr_str(prompt, UNREADABLY));
   }
   char *str = readline(prompt->value.mal_string);
   if (str) {
     add_history(str);
     return make_string(str);
-  }
-  else {
+  } else {
     return make_nil();
   }
 }
@@ -3242,16 +3055,14 @@ MalType *eval_ast(MalType *ast, Env *env) {
     } else {
       return make_error_fmt("var '%s' not found", pr_str(ast, UNREADABLY));
     }
-  }
-  else if (is_list(ast)) {
+  } else if (is_list(ast)) {
     list result = evaluate_list(ast->value.mal_list, env);
     if (!result || !is_error(result->data)) {
       return make_list(result);
     } else {
       return result->data;
     }
-  }
-  else if (is_vector(ast)) {
+  } else if (is_vector(ast)) {
     list result = evaluate_vector(ast->value.mal_list, env);
     if (!result || !is_error(result->data)) {
       return make_vector(result);
@@ -3426,8 +3237,9 @@ MalType *eval_quasiquote(MalType *ast) {
 }
 /*
 https://clojure.org/reference/reader#syntax-quote
-syntax-quote (`, note the "backquote" character), Unquote (~) and Unquote-splicing (~@) quote (')
-quasiquote 是scheme 的叫法 https://scheme.com/tspl4/grammar.html
+syntax-quote (`, note the "backquote" character), Unquote (~) and
+Unquote-splicing (~@) quote (') quasiquote 是scheme 的叫法
+https://scheme.com/tspl4/grammar.html
 '<datum> <graphic> (quote <datum>)
 `<datum> <graphic> (quasiquote <datum>)
 ,<datum> <graphic> (unquote <datum>)
@@ -3437,7 +3249,7 @@ quasiquote 是scheme 的叫法 https://scheme.com/tspl4/grammar.html
 #,<datum> <graphic> (unsyntax <datum>)
 #,@<datum> <graphic> (unsyntax-splicing <datum>)
 */
-//todo: change quasiquote to syntax-quote
+// todo: change quasiquote to syntax-quote
 MalType *quasiquote(MalType *ast) {
   /* argument to quasiquote is self-evaluating: (quasiquote val) => val */
   if (is_self_evaluating(ast)) {
@@ -3451,7 +3263,8 @@ MalType *quasiquote(MalType *ast) {
   else if (is_list(ast)) {
     return quasiquote_list(ast);
   }
-  /* argument to quasiquote is not self-evaluating and isn't sequential: (quasiquote val) => (quote val) */
+  /* argument to quasiquote is not self-evaluating and isn't sequential:
+     (quasiquote val) => (quote val) */
   else {
     list lst = list_make(ast);
     lst = list_push(lst, make_symbol("quote"));
@@ -3466,7 +3279,8 @@ MalType *quasiquote_vector(MalType *ast) {
   if (args) {
     MalType *first = args->data;
     /* if first element is unquote return quoted */
-    if (is_symbol(first) && strcmp(first->value.mal_symbol, SYMBOL_UNQUOTE) == 0) {
+    if (is_symbol(first) &&
+        strcmp(first->value.mal_symbol, SYMBOL_UNQUOTE) == 0) {
       list lst = list_make(ast);
       lst = list_push(lst, make_symbol("quote"));
       return make_list(lst);
@@ -3492,7 +3306,8 @@ MalType *quasiquote_list(MalType *ast) {
   }
   MalType *first = args->data;
   /* handle unquote: (quasiquote (unquote second)) => second */
-  if (is_symbol(first) && strcmp(first->value.mal_symbol, SYMBOL_UNQUOTE) == 0 && args->next) {
+  if (is_symbol(first) &&
+      strcmp(first->value.mal_symbol, SYMBOL_UNQUOTE) == 0 && args->next) {
     if (args->next->next) {
       return make_error("'quasiquote': unquote expected exactly one argument");
     } else {
@@ -3501,12 +3316,13 @@ MalType *quasiquote_list(MalType *ast) {
   }
   /* handle splice-unquote: (quasiquote ((splice-unquote first-second) rest))
      => (concat first-second (quasiquote rest)) */
-  else if (is_list(first) &&
-           first->value.mal_list != NULL &&
+  else if (is_list(first) && first->value.mal_list != NULL &&
            is_symbol(first->value.mal_list->data) &&
-           strcmp(((MalType *)first->value.mal_list->data)->value.mal_symbol, SYMBOL_SPLICE_UNQUOTE) == 0) {
+           strcmp(((MalType *)first->value.mal_list->data)->value.mal_symbol,
+                  SYMBOL_SPLICE_UNQUOTE) == 0) {
     if (!first->value.mal_list->next) {
-      return make_error("'quasiquote': splice-unquote expected exactly one argument");
+      return make_error(
+          "'quasiquote': splice-unquote expected exactly one argument");
     }
     MalType *first_second = first->value.mal_list->next->data;
     list lst = list_make(make_symbol("concat"));
@@ -3519,7 +3335,7 @@ MalType *quasiquote_list(MalType *ast) {
     lst = list_reverse(lst);
     return make_list(lst);
   }
-  /* handle all other lists recursively: 
+  /* handle all other lists recursively:
   (quasiquote (first rest)) => (cons (quasiquote first) (quasiquote rest)) */
   else {
     list lst = list_make(make_symbol("cons"));
@@ -3645,7 +3461,9 @@ list evaluate_list(list lst, Env *env) {
   list evlst = NULL;
   while (lst) {
     MalType *val = EVAL(lst->data, env);
-    if (is_error(val)) { return list_make(val); }
+    if (is_error(val)) {
+      return list_make(val);
+    }
     evlst = list_push(evlst, val);
     lst = lst->next;
   }
@@ -3683,7 +3501,7 @@ list evaluate_hashmap(list lst, Env *env) {
   }
   return list_reverse(evlst);
 }
-// clojure 不定参数 & 
+// clojure 不定参数 &
 MalType *regularise_parameters(list *args, MalType **more_symbol) {
   /* forward reference */
   char *symbol_fn(gptr data);
@@ -3691,7 +3509,8 @@ MalType *regularise_parameters(list *args, MalType **more_symbol) {
   while (*args) {
     MalType *val = (*args)->data;
     if (!is_symbol(val)) {
-      return make_error_fmt("non-symbol found in fn argument list '%s'", pr_str(val, UNREADABLY));
+      return make_error_fmt("non-symbol found in fn argument list '%s'",
+                            pr_str(val, UNREADABLY));
     }
     if (val->value.mal_symbol[0] == '&') {
       /* & is found but there is no symbol */
@@ -3699,16 +3518,18 @@ MalType *regularise_parameters(list *args, MalType **more_symbol) {
         return make_error("missing symbol after '&' in argument list");
       }
       /* & is found and there is a single symbol after */
-      else if ((val->value.mal_symbol[1] == '\0' && (*args)->next 
-                && is_symbol((*args)->next->data) && !(*args)->next->next)) {
+      else if ((val->value.mal_symbol[1] == '\0' && (*args)->next &&
+                is_symbol((*args)->next->data) && !(*args)->next->next)) {
         *more_symbol = (*args)->next->data;
         break;
       }
       /* & is found and there extra symbols after */
-      else if ((val->value.mal_symbol[1] == '\0' && (*args)->next && (*args)->next->next)) {
-        return make_error_fmt("unexpected symbol after '& %s' in argument list: '%s'",
-                              pr_str((*args)->next->data, UNREADABLY),
-                              pr_str((*args)->next->next->data, UNREADABLY));
+      else if ((val->value.mal_symbol[1] == '\0' && (*args)->next &&
+                (*args)->next->next)) {
+        return make_error_fmt(
+            "unexpected symbol after '& %s' in argument list: '%s'",
+            pr_str((*args)->next->data, UNREADABLY),
+            pr_str((*args)->next->next->data, UNREADABLY));
       }
       /* & is found as part of the symbol and no other symbols */
       else if (val->value.mal_symbol[1] != '\0' && !(*args)->next) {
@@ -3717,15 +3538,16 @@ MalType *regularise_parameters(list *args, MalType **more_symbol) {
       }
       /* & is found as part of the symbol but there are other symbols after */
       else if (val->value.mal_symbol[1] != '\0' && (*args)->next) {
-        return make_error_fmt("unexpected symbol after '%s' in argument list: '%s'",
-                              pr_str(val, UNREADABLY),
-                              pr_str((*args)->next->data, UNREADABLY));
+        return make_error_fmt(
+            "unexpected symbol after '%s' in argument list: '%s'",
+            pr_str(val, UNREADABLY), pr_str((*args)->next->data, UNREADABLY));
       }
     }
     /* & is not found - add the symbol to the regular argument list */
     else {
       if (list_findf(regular_args, val->value.mal_symbol, symbol_fn) > 0) {
-        return make_error_fmt("duplicate symbol in argument list: '%s'", pr_str(val, UNREADABLY));
+        return make_error_fmt("duplicate symbol in argument list: '%s'",
+                              pr_str(val, UNREADABLY));
       } else {
         regular_args = list_push(regular_args, val);
       }
@@ -3736,9 +3558,7 @@ MalType *regularise_parameters(list *args, MalType **more_symbol) {
   return make_nil();
 }
 
-char *symbol_fn(gptr data) {
-  return (((MalType *)data)->value.mal_symbol);
-}
+char *symbol_fn(gptr data) { return (((MalType *)data)->value.mal_symbol); }
 
 /* used by core functions but not EVAL as doesn't do TCE */
 MalType *apply(MalType *fn, list args) {
@@ -3762,10 +3582,12 @@ MalType *apply(MalType *fn, list args) {
 }
 
 int is_macro_call(MalType *ast, Env *env) {
-  if (!is_list(ast)) return 0;
-  list lst = ast->value.mal_list;    /* empty list */
-  if (!lst) return 0;
-  MalType *first = lst->data;   /* first item not a symbol */
+  if (!is_list(ast))
+    return 0;
+  list lst = ast->value.mal_list; /* empty list */
+  if (!lst)
+    return 0;
+  MalType *first = lst->data; /* first item not a symbol */
   if (!is_symbol(first)) {
     return 0;
   }
@@ -3788,7 +3610,8 @@ int main(int argc, char **argv) {
     char *symbol = mappings->data;
     MalType *(*function)(list) = mappings->next->data;
     env_set_C_fn(repl_env, symbol, function);
-    mappings = mappings->next->next;    /* pop symbol and function from hashmap/list */
+    mappings =
+        mappings->next->next; /* pop symbol and function from hashmap/list */
   }
 
   env_set_C_fn(repl_env, "eval", mal_eval);
@@ -3796,8 +3619,13 @@ int main(int argc, char **argv) {
 
   /* add functions written in mal - not using rep as it prints the result */
   EVAL(READ("(def! not (fn* (a) (if a false true)))"), repl_env);
-  EVAL(READ("(def! load-file (fn* (f) (eval (read-string (str \"(do \" (slurp f) \"\nnil)\")))))"), repl_env);
-  EVAL(READ("(defmacro! cond (fn* (& xs) (if (> (count xs) 0) (list 'if (first xs) (if (> (count xs) 1) (nth xs 1) (throw \"odd number of forms to cond\")) (cons 'cond (rest (rest xs)))))))"), repl_env);
+  EVAL(READ("(def! load-file (fn* (f) (eval (read-string (str \"(do \" (slurp "
+            "f) \"\nnil)\")))))"),
+       repl_env);
+  EVAL(READ("(defmacro! cond (fn* (& xs) (if (> (count xs) 0) (list 'if (first "
+            "xs) (if (> (count xs) 1) (nth xs 1) (throw \"odd number of forms "
+            "to cond\")) (cons 'cond (rest (rest xs)))))))"),
+       repl_env);
 
   EVAL(READ("(load-file \"core.clj\")"), repl_env);
   /* make command line arguments available in the environment */
