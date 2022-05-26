@@ -8,3 +8,4 @@ settings.json
 *.jar
 *.class
 clojure
+str
