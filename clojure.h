@@ -10,21 +10,24 @@
 #include <editline/history.h>
 
 //type 15种类型 同像性
-#define MALTYPE_SYMBOL 1
-#define MALTYPE_KEYWORD 2
-#define MALTYPE_INTEGER 3
-#define MALTYPE_FLOAT 4
-#define MALTYPE_STRING 5
-#define MALTYPE_TRUE 6
-#define MALTYPE_FALSE 7
-#define MALTYPE_NIL 8
-#define MALTYPE_LIST 9
-#define MALTYPE_VECTOR 10
-#define MALTYPE_HASHMAP 11
-#define MALTYPE_FUNCTION 12 // native function
-#define MALTYPE_CLOSURE 13  // user custom function
-#define MALTYPE_ERROR 14
-#define MALTYPE_ATOM 15
+enum{
+one,  //void 0
+MALTYPE_SYMBOL, //1
+MALTYPE_KEYWORD, //2
+MALTYPE_INTEGER, //3
+MALTYPE_FLOAT, //4
+MALTYPE_STRING, //5
+MALTYPE_TRUE, //6
+MALTYPE_FALSE, //7
+MALTYPE_NIL, //8
+MALTYPE_LIST, //9
+MALTYPE_VECTOR, //10
+MALTYPE_HASHMAP, //11
+MALTYPE_FUNCTION, //12 // native function
+MALTYPE_CLOSURE, //13  // user custom function
+MALTYPE_ERROR, //14
+MALTYPE_ATOM //15
+};
 
 #define UNREADABLY 0
 #define READABLY 1
@@ -57,7 +60,7 @@
 #define SYMBOL_BUFFER_SIZE 32
 #define FUNCTION_BUFFER_SIZE 256
 // #define STRING_BUFFER_SIZE 256
-#define LIST_BUFFER_SIZE 1024
+#define LIST_BUFFER_SIZE 10240
 #define ERROR_BUFFER_SIZE 128
 
 // token type 

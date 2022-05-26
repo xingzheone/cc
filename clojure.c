@@ -3202,14 +3202,14 @@ https://clojure.org/reference/reader#syntax-quote
 syntax-quote (`, note the "backquote" character), Unquote (~) and
 Unquote-splicing (~@) quote (') quasiquote 是scheme 的叫法
 https://scheme.com/tspl4/grammar.html
-'<datum> <graphic> (quote <datum>)
-`<datum> <graphic> (quasiquote <datum>)
-,<datum> <graphic> (unquote <datum>)
-,@<datum> <graphic> (unquote-splicing <datum>)
-#'<datum> <graphic> (syntax <datum>)
-#`<datum> <graphic> (quasisyntax <datum>)
-#,<datum> <graphic> (unsyntax <datum>)
-#,@<datum> <graphic> (unsyntax-splicing <datum>)
+' (quote <datum>)
+` (quasiquote <datum>)
+, (unquote <datum>)
+,@ (unquote-splicing <datum>)
+#' (syntax <datum>)
+#` (quasisyntax <datum>)
+#, (unsyntax <datum>)
+#,@ (unsyntax-splicing <datum>)
 */
 // todo: change quasiquote to syntax-quote
 maltype *quasiquote(maltype *ast) {
@@ -3597,7 +3597,7 @@ int main(int argc, char **argv) {
     char *load_command = snprintfbuf(1024, "(load-file \"%s\")", argv[1]);
     rep(load_command, repl_env);
   } else {
-    rep("(println (str \"Mal [\" *host-language* \"]\"))", repl_env);
+    rep("(println (str \"mal [\" *host-language* \"]\"))", repl_env);
     while (1) {
       char *input = readline(PROMPT_STRING);
       if (!input) { printf("\n"); return 0; } /* Check for EOF (Ctrl-D) */
