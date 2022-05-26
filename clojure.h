@@ -104,21 +104,21 @@ typedef struct Env {
   hashmap data;
 } Env;
 
-typedef struct MalType MalType;
+typedef struct maltype maltype;
 
 typedef struct MalClosure {
   Env *env;
-  MalType *parameters;
-  MalType *more_symbol;
-  MalType *definition;
+  maltype *parameters;
+  maltype *more_symbol;
+  maltype *definition;
 } MalClosure;
 /*四个字段 
  vector mal_vector;  TODO: implement a real vector
  hashmap mal_hashmap; TODO: implement a real hashmap */
-typedef struct MalType {
+struct maltype {
   int type;
   int is_macro;
-  MalType *metadata;
+  maltype *metadata;
   union MalValue {
     long mal_integer;
     double mal_float;
@@ -126,12 +126,12 @@ typedef struct MalType {
     char *mal_string;
     char *mal_keyword;
     list mal_list;
-    MalType *(*mal_function)(list);
+    maltype *(*mal_function)(list);
     MalClosure *mal_closure;
-    MalType *mal_atom;
-    MalType *mal_error;
+    maltype *mal_atom;
+    maltype *mal_error;
   } value;
-} MalType;
+};
 
 typedef struct Token {
   int type;
@@ -167,65 +167,65 @@ gptr hashmap_get(hashmap map, char *keystring);
 gptr hashmap_getf(hashmap map, char *keystring, char *(*fn)(gptr));
 hashmap hashmap_updatef(hashmap map, char *keystring, gptr value, char *(*fn)(gptr));
 
-Env *env_make(Env *outer, list binds, list exprs, MalType *variadic_symbol);
-Env *env_set(Env *current, MalType *symbol, MalType *value);
-Env *env_set_C_fn(Env *current, char *symbol_name, MalType *(*fn)(list));
-MalType *env_get(Env *current, MalType *symbol);
-Env *env_find(Env *current, MalType *symbol);
+Env *env_make(Env *outer, list binds, list exprs, maltype *variadic_symbol);
+Env *env_set(Env *current, maltype *symbol, maltype *value);
+Env *env_set_C_fn(Env *current, char *symbol_name, maltype *(*fn)(list));
+maltype *env_get(Env *current, maltype *symbol);
+Env *env_find(Env *current, maltype *symbol);
 
-MalType *make_symbol(char *value);
-MalType *make_integer(long value);
-MalType *make_float(double value);
-MalType *make_keyword(char *value);
-MalType *make_string(char *value);
-MalType *make_list(list value);
-MalType *make_vector(list value);
-MalType *make_hashmap(list value);
-MalType *make_true();
-MalType *make_false();
-MalType *make_nil();
-MalType *make_atom(MalType *value);
-MalType *make_error(char *msg);
-MalType *make_error_fmt(char *fmt, ...);
-MalType *wrap_error(MalType *value);
-MalType *make_function(MalType *(*fn)(list args));
-MalType *make_closure(Env *env, MalType *parameters, MalType *definition, MalType *more_symbol);
-MalType *copy_type(MalType *value);
+maltype *make_symbol(char *value);
+maltype *make_integer(long value);
+maltype *make_float(double value);
+maltype *make_keyword(char *value);
+maltype *make_string(char *value);
+maltype *make_list(list value);
+maltype *make_vector(list value);
+maltype *make_hashmap(list value);
+maltype *make_true();
+maltype *make_false();
+maltype *make_nil();
+maltype *make_atom(maltype *value);
+maltype *make_error(char *msg);
+maltype *make_error_fmt(char *fmt, ...);
+maltype *wrap_error(maltype *value);
+maltype *make_function(maltype *(*fn)(list args));
+maltype *make_closure(Env *env, maltype *parameters, maltype *definition, maltype *more_symbol);
+maltype *copy_type(maltype *value);
 
-int is_sequential(MalType *val);
-int is_self_evaluating(MalType *val);
-int is_list(MalType *val);
-int is_vector(MalType *val);
-int is_hashmap(MalType *val);
-int is_nil(MalType *val);
-int is_string(MalType *val);
-int is_integer(MalType *val);
-int is_float(MalType *val);
-int is_number(MalType *val);
-int is_true(MalType *val);
-int is_false(MalType *val);
-int is_symbol(MalType *val);
-int is_keyword(MalType *val);
-int is_atom(MalType *val);
-int is_error(MalType *val);
-int is_callable(MalType *val);
-int is_function(MalType *val);
-int is_closure(MalType *val);
-int is_macro(MalType *val);
+int is_sequential(maltype *val);
+int is_self_evaluating(maltype *val);
+int is_list(maltype *val);
+int is_vector(maltype *val);
+int is_hashmap(maltype *val);
+int is_nil(maltype *val);
+int is_string(maltype *val);
+int is_integer(maltype *val);
+int is_float(maltype *val);
+int is_number(maltype *val);
+int is_true(maltype *val);
+int is_false(maltype *val);
+int is_symbol(maltype *val);
+int is_keyword(maltype *val);
+int is_atom(maltype *val);
+int is_error(maltype *val);
+int is_callable(maltype *val);
+int is_function(maltype *val);
+int is_closure(maltype *val);
+int is_macro(maltype *val);
 
-int is_macro_call(MalType * ast, Env * env);
-MalType *macroexpand(MalType * ast, Env * env);
-MalType *regularise_parameters(list * params, MalType * *more);
-MalType *quasiquote(MalType * ast);
-MalType *quasiquote_list(MalType * ast);
-MalType *quasiquote_vector(MalType * ast);
+int is_macro_call(maltype * ast, Env * env);
+maltype *macroexpand(maltype * ast, Env * env);
+maltype *regularise_parameters(list * params, maltype * *more);
+maltype *quasiquote(maltype * ast);
+maltype *quasiquote_list(maltype * ast);
+maltype *quasiquote_vector(maltype * ast);
 
 ns *ns_make_core();
-MalType *as_str(list args, int readably, char *separator);
-MalType *print(list args, int readably, char *separator);
+maltype *as_str(list args, int readably, char *separator);
+maltype *print(list args, int readably, char *separator);
 char *get_fn(gptr data);
-MalType *equal_lists(MalType *lst1, MalType *lst2);
-MalType *equal_hashmaps(MalType *map1, MalType *map2);
+maltype *equal_lists(maltype *lst1, maltype *lst2);
+maltype *equal_hashmaps(maltype *map1, maltype *map2);
 
 /* reader object */
 Reader *reader_make(long token_capacity);
@@ -247,95 +247,95 @@ char *read_keyword_token(char *current, Token **ptoken);
 
 
 /* reading the tokens into types */
-MalType *read_str(char *token_string);
-MalType *read_form(Reader *reader);
-MalType *read_atom(Reader *reader);
-MalType *read_list(Reader *reader);
-MalType *read_vector(Reader *reader);
-MalType *read_hashmap(Reader *reader);
+maltype *read_str(char *token_string);
+maltype *read_form(Reader *reader);
+maltype *read_atom(Reader *reader);
+maltype *read_list(Reader *reader);
+maltype *read_vector(Reader *reader);
+maltype *read_hashmap(Reader *reader);
 
 /* utility functions */
 char *read_terminated_token(char *current, Token **ptoken, int type);
-MalType *read_matched_delimiters(Reader *reader, char start_delimiter, char end_delimiter);
-MalType *make_symbol_list(Reader *reader, char *symbol_name);
+maltype *read_matched_delimiters(Reader *reader, char start_delimiter, char end_delimiter);
+maltype *make_symbol_list(Reader *reader, char *symbol_name);
 Token *token_allocate(char *str, long num_chars, int type, char *error);
 char *unescape_string(char *str, long length);
 
-char *pr_str(MalType *mal_val, int readably);
+char *pr_str(maltype *mal_val, int readably);
 char *pr_str_list(list lst, int readably, char *start_delimiter, char *end_delimiter, char *separator);
 char *escape_string(char *str);
 char *snprintfbuf(long initial_size, char *fmt, ...);
 
 // ns core native fn
 /* forward references to main file */
-MalType *apply(MalType *fn, list args);
+maltype *apply(maltype *fn, list args);
 
 /* core ns functions */
-MalType *mal_add(list);
-MalType *mal_sub(list);
-MalType *mal_mul(list);
-MalType *mal_div(list);
+maltype *mal_add(list);
+maltype *mal_sub(list);
+maltype *mal_mul(list);
+maltype *mal_div(list);
 
-MalType *mal_prn(list);
-MalType *mal_println(list);
-MalType *mal_pr_str(list);
-MalType *mal_str(list);
-MalType *mal_read_string(list);
-MalType *mal_slurp(list);
+maltype *mal_prn(list);
+maltype *mal_println(list);
+maltype *mal_pr_str(list);
+maltype *mal_str(list);
+maltype *mal_read_string(list);
+maltype *mal_slurp(list);
 
-MalType *mal_list(list);
-MalType *mal_list_questionmark(list);
-MalType *mal_empty_questionmark(list);
-MalType *mal_count(list);
-MalType *mal_cons(list);
-MalType *mal_concat(list);
-MalType *mal_nth(list);
-MalType *mal_first(list);
-MalType *mal_rest(list);
+maltype *mal_list(list);
+maltype *mal_list_questionmark(list);
+maltype *mal_empty_questionmark(list);
+maltype *mal_count(list);
+maltype *mal_cons(list);
+maltype *mal_concat(list);
+maltype *mal_nth(list);
+maltype *mal_first(list);
+maltype *mal_rest(list);
 
-MalType *mal_equals(list);
-MalType *mal_lessthan(list);
-MalType *mal_lessthanorequalto(list);
-MalType *mal_greaterthan(list);
-MalType *mal_greaterthanorequalto(list);
+maltype *mal_equals(list);
+maltype *mal_lessthan(list);
+maltype *mal_lessthanorequalto(list);
+maltype *mal_greaterthan(list);
+maltype *mal_greaterthanorequalto(list);
 
-MalType *mal_atom(list);
-MalType *mal_atom_questionmark(list);
-MalType *mal_deref(list);
-MalType *mal_reset_bang(list);
-MalType *mal_swap_bang(list);
+maltype *mal_atom(list);
+maltype *mal_atom_questionmark(list);
+maltype *mal_deref(list);
+maltype *mal_reset_bang(list);
+maltype *mal_swap_bang(list);
 
-MalType *mal_throw(list);
-MalType *mal_apply(list);
-MalType *mal_map(list);
+maltype *mal_throw(list);
+maltype *mal_apply(list);
+maltype *mal_map(list);
 
-MalType *mal_nil_questionmark(list);
-MalType *mal_true_questionmark(list);
-MalType *mal_false_questionmark(list);
-MalType *mal_symbol_questionmark(list);
-MalType *mal_keyword_questionmark(list);
-MalType *mal_symbol(list);
-MalType *mal_keyword(list);
+maltype *mal_nil_questionmark(list);
+maltype *mal_true_questionmark(list);
+maltype *mal_false_questionmark(list);
+maltype *mal_symbol_questionmark(list);
+maltype *mal_keyword_questionmark(list);
+maltype *mal_symbol(list);
+maltype *mal_keyword(list);
 
-MalType *mal_vec(list);
-MalType *mal_vector(list);
-MalType *mal_vector_questionmark(list);
-MalType *mal_sequential_questionmark(list);
-MalType *mal_hash_map(list);
-MalType *mal_map_questionmark(list);
-MalType *mal_assoc(list);
-MalType *mal_dissoc(list);
-MalType *mal_get(list);
-MalType *mal_contains_questionmark(list);
-MalType *mal_keys(list);
-MalType *mal_vals(list);
-MalType *mal_string_questionmark(list);
-MalType *mal_number_questionmark(list);
-MalType *mal_fn_questionmark(list);
-MalType *mal_macro_questionmark(list);
+maltype *mal_vec(list);
+maltype *mal_vector(list);
+maltype *mal_vector_questionmark(list);
+maltype *mal_sequential_questionmark(list);
+maltype *mal_hash_map(list);
+maltype *mal_map_questionmark(list);
+maltype *mal_assoc(list);
+maltype *mal_dissoc(list);
+maltype *mal_get(list);
+maltype *mal_contains_questionmark(list);
+maltype *mal_keys(list);
+maltype *mal_vals(list);
+maltype *mal_string_questionmark(list);
+maltype *mal_number_questionmark(list);
+maltype *mal_fn_questionmark(list);
+maltype *mal_macro_questionmark(list);
 
-MalType *mal_time_ms(list);
-MalType *mal_conj(list);
-MalType *mal_seq(list);
-MalType *mal_meta(list);
-MalType *mal_with_meta(list);
+maltype *mal_time_ms(list);
+maltype *mal_conj(list);
+maltype *mal_seq(list);
+maltype *mal_meta(list);
+maltype *mal_with_meta(list);
