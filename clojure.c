@@ -130,17 +130,13 @@ hashmap hashmap_put(hashmap map, char *keystring, gptr data_ptr) {
 
 gptr hashmap_get(hashmap map, char *keystring) {
   /* handle empty case */
-  if (!map) {
-    return NULL;
-  }
+  if (!map) { return NULL; }
   list lst = map;
   while (lst) {
     if (strcmp(keystring, (char *)lst->data) == 0) {
-      return (lst->next)
-          ->data; /* return next item in list which is the value */
+      return (lst->next)->data; /* return next item in list which is the value */
     } else {
-      lst = (lst->next)->next; /* skip the next item in the list to get to the
-                                  next key */
+      lst = (lst->next)->next; /* skip the next item in the list to get to the next key */
     }
   }
   return NULL; /* not found */
@@ -148,44 +144,35 @@ gptr hashmap_get(hashmap map, char *keystring) {
 
 gptr hashmap_getf(hashmap map, char *keystring, char *(*fn)(gptr)) {
   /* handle empty case */
-  if (!map) {
-    return NULL;
-  }
+  if (!map) { return NULL; }
   list lst = map;
   while (lst) {
     /* apply fn to the data to get a string */
     char *item = fn(lst->data);
     if (strcmp(keystring, item) == 0) {
-      return (lst->next)
-          ->data; /* return next item in list which is the value */
+      return (lst->next)->data; /* return next item in list which is the value */
     } else {
-      lst = (lst->next)->next; /* skip the next item in the list to get to the
-                                  next key */
+      lst = (lst->next)->next; /* skip the next item in the list to get to the next key */
     }
   }
   return NULL; /* not found */
 }
 
-hashmap hashmap_updatef(hashmap map, char *keystring, gptr value,
-                        char *(*fn)(gptr)) {
+hashmap hashmap_updatef(hashmap map, char *keystring, gptr value, char *(*fn)(gptr)) {
   /* handle empty case */
-  if (!map) {
-    return NULL;
-  }
+  if (!map) { return NULL; }
   list lst = map;
   while (lst) {
     /* apply fn to the data to get a string */
     char *item = fn(lst->data);
     if (strcmp(keystring, item) == 0) {
-      (lst->next)->data =
-          value;  /* update the next item in list which is the value */
+      (lst->next)->data = value;  /* update the next item in list which is the value */
       return map; /* update made */
     } else {
-      lst = (lst->next)->next; /* skip the next item in the list to get to the
-                                  next key */
+      lst = (lst->next)->next; /* skip the next item in the list to get to the next key */
     }
   }
-  return NULL; /* no update */
+  return NULL;
 }
 // end hashmap.c
 // type.c
@@ -326,8 +313,7 @@ maltype *make_function(maltype *(*fn)(list args)) {
   return mal_val;
 }
 
-maltype *make_closure(Env *env, maltype *parameters, maltype *definition,
-                      maltype *more_symbol) {
+maltype *make_closure(Env *env, maltype *parameters, maltype *definition, maltype *more_symbol) {
   maltype *mal_val = GC_MALLOC(sizeof(*mal_val));
   mal_val->type = MALTYPE_CLOSURE;
   mal_val->metadata = NULL;
@@ -345,9 +331,7 @@ maltype *make_closure(Env *env, maltype *parameters, maltype *definition,
 }
 
 inline maltype *make_true() { return &THE_TRUE; }
-
 inline maltype *make_false() { return &THE_FALSE; }
-
 inline maltype *make_nil() { return &THE_NIL; }
 
 maltype *make_error(char *msg) {
@@ -365,18 +349,13 @@ maltype *make_error(char *msg) {
 maltype *make_error_fmt(char *fmt, ...) {
   va_list argptr;
   va_start(argptr, fmt);
-
   char *buffer = GC_MALLOC(sizeof(*buffer) * ERROR_BUFFER_SIZE);
-
   long n = vsnprintf(buffer, ERROR_BUFFER_SIZE, fmt, argptr);
   va_end(argptr);
-
   if (n > ERROR_BUFFER_SIZE) {
     va_start(argptr, fmt);
-
     buffer = GC_REALLOC(buffer, sizeof(*buffer) * n);
     vsnprintf(buffer, n, fmt, argptr);
-
     va_end(argptr);
   }
   return make_error(buffer);
