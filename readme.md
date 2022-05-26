@@ -1,5 +1,7 @@
 Clojure interpreter learning
 
+sudo apt-get install libedit-dev
+
 gcc clojure.c -ledit -lgc
 
 

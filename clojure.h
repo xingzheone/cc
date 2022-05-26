@@ -7,7 +7,6 @@
 #include <stdarg.h>
 #include <ctype.h>
 #include <editline/readline.h>
-#include <editline/history.h>
 
 //type 15种类型 同像性
 enum{
