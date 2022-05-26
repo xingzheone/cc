@@ -9,5 +9,6 @@
         "wchar.h": "c",
         "stdio.h": "c",
         "history.h": "c"
-    }
+    },
+    "editor.fontLigatures": true
 }

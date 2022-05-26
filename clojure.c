@@ -139,7 +139,7 @@ gptr hashmap_get(hashmap map, char *keystring) {
       lst = (lst->next)->next; /* skip the next item in the list to get to the next key */
     }
   }
-  return NULL; /* not found */
+  return NULL; 
 }
 
 gptr hashmap_getf(hashmap map, char *keystring, char *(*fn)(gptr)) {
@@ -461,7 +461,6 @@ void reader_print(Reader *reader) {
       break;
     }
     printf("\n");
-    /* print an error for any tokens with an error string */
     tok->error ? printf(" - %s", tok->error) : 0;
   }
   reader->position = 0; //恢复
@@ -478,10 +477,7 @@ maltype *read_str(char *token_string) {
     return read_form(reader);
   }
 }
-// 2022年4月30日 20点37分
-/* allocate enough space for a Reader
-TODO: over-allocates space
-*/
+/* allocate enough space for a Reader TODO: over-allocates space */
 Reader *tokenize(char *token_string) {
   Reader *reader = reader_make(strlen(token_string));
   for (char *next = token_string; *next != '\0';) {
@@ -618,10 +614,8 @@ char *read_number_token(char *current, Token **ptoken) {
   char *next = read_terminated_token(current, ptoken, TOKEN_INTEGER);
   long token_length = next - current;
 
-  /* first char is either digit or '+' or '-'
-     check the rest consists of valid characters */
+  /* first char is either digit or '+' or '-' check the rest consists of valid characters */
   for (long i = 1; i < token_length; i++) {
-
     if ((*ptoken)->data[i] == '.' && has_decimal_point) {
       (*ptoken)->error = "Invalid character reading number";
       break;
@@ -649,17 +643,12 @@ char *ho_strpbrk(char *s1, char *s2) {
 }
 
 char *read_string_token(char *current, Token **ptoken) {
-
   char *start, *end, *error = NULL;
   long token_length = 0;
-
   start = current + 1;
-
   while (1) {
     end = strchr(start, '"'); /* find the next " character */
-
-    /* handle failure to find closing quotes - implies end of input has been
-     * reached */
+    /* handle failure to find closing quotes - implies end of input has been  reached */
     if (!end) {
       end = current + strlen(current);
       token_length = strlen(current);
@@ -697,8 +686,7 @@ char *read_string_token(char *current, Token **ptoken) {
   }
 
   char *unescaped_string = unescape_string(current + 1, token_length);
-  *ptoken = token_allocate(unescaped_string, strlen(unescaped_string),
-                           TOKEN_STRING, error);
+  *ptoken = token_allocate(unescaped_string, strlen(unescaped_string), TOKEN_STRING, error);
 
   return (end + 1);
 }
@@ -713,8 +701,7 @@ char *read_comment_token(char *current, Token **ptoken) {
   return (current + token_chars +
           1); /* next token starts with the char after the newline */
 }
-// read_form 的时候把 ` ' @ 等quote 规范成了(xxqutoe xxx)等标准的 list 形式.
-// amtf
+// read_form 的时候把 ` ' @ 等quote 规范成了(xxqutoe xxx)等标准的 list 形式.  amtf
 maltype *read_form(Reader *reader) {
   if (reader->token_count > 0) {
     Token *tok = reader_peek(reader);
@@ -766,8 +753,7 @@ maltype *read_form(Reader *reader) {
         return make_list(lst);
       default:
         /* shouldn't happen */
-        return make_error_fmt("Reader error: Unknown special character '%c'",
-                              tok->data[0]);
+        return make_error_fmt("reader error: unknown special character '%c'", tok->data[0]);
       }
     } else { /* 当前char 不是 9种符号 ( { [ ' ` ~ @ ~@ ^ Not a special character
               */
@@ -810,8 +796,7 @@ maltype *read_hashmap(Reader *reader) {
   return retval;
 }
 // 读取3个匹配的分隔符 () {} []
-maltype *read_matched_delimiters(Reader *reader, char start_delimiter,
-                                 char end_delimiter) {
+maltype *read_matched_delimiters(Reader *reader, char start_delimiter, char end_delimiter) {
   /* TODO: separate implementation of hashmap and vector */
   Token *tok = reader_next(reader);
   list lst = NULL;
@@ -886,8 +871,7 @@ maltype *make_symbol_list(Reader *reader, char *symbol_name) {
 
 Token *token_allocate(char *str, long num_chars, int type, char *error) {
   /* allocate space for the string */
-  char *data = GC_MALLOC(sizeof(*data) * num_chars +
-                         1);     /* include space for null byte */
+  char *data = GC_MALLOC(sizeof(*data) * num_chars + 1);     /* include space for null byte */
   strncpy(data, str, num_chars); /* copy num_chars characters into data */
   data[num_chars] = '\0';        /* manually add the null byte */
   /* allocate space for the token struct */
@@ -936,8 +920,7 @@ char *unescape_string(char *str, long length) {
 
 // env.c
 /* Note: caller must make sure enough exprs to match symbols */
-Env *env_make(Env *outer, list symbol_list, list exprs_list,
-              maltype *more_symbol) {
+Env *env_make(Env *outer, list symbol_list, list exprs_list, maltype *more_symbol) {
 
   Env *env = GC_MALLOC(sizeof(*env));
   env->outer = outer;
@@ -948,7 +931,6 @@ Env *env_make(Env *outer, list symbol_list, list exprs_list,
     symbol_list = symbol_list->next;
     exprs_list = exprs_list->next;
   }
-
   /* set the 'more' symbol if there is one */
   if (more_symbol) {
     env = env_set(env, more_symbol, make_list(exprs_list));
@@ -973,9 +955,7 @@ Env *env_find(Env *current, maltype *symbol) {
 }
 
 maltype *env_get(Env *current, maltype *symbol) {
-
   Env *env = env_find(current, symbol);
-
   if (env) {
     return hashmap_get(env->data, symbol->value.mal_symbol);
   } else {
@@ -1062,8 +1042,6 @@ maltype *mal_seq(list);
 maltype *mal_meta(list);
 maltype *mal_with_meta(list);
 
-// ns
-
 maltype *get_type(list node) {
   printf("ci: %p \n", node);
   maltype *mt = node->data;
@@ -1075,7 +1053,7 @@ maltype *get_type(list node) {
 
 /* only needed for ffi */
 #ifdef WITH_FFI
-MalType *mal_dot(list);
+maltype *mal_dot(list);
 #endif
 
 ns *ns_make_core() {
@@ -1103,8 +1081,7 @@ ns *ns_make_core() {
 
   /* lists */
   core_functions = hashmap_put(core_functions, "list", mal_list);
-  core_functions =
-      hashmap_put(core_functions, "empty?", mal_empty_questionmark);
+  core_functions = hashmap_put(core_functions, "empty?", mal_empty_questionmark);
   core_functions = hashmap_put(core_functions, "count", mal_count);
   core_functions = hashmap_put(core_functions, "cons", mal_cons);
   core_functions = hashmap_put(core_functions, "concat", mal_concat);
