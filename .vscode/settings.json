@@ -6,6 +6,8 @@
         "gc.h": "c",
         "readline.h": "c",
         "iconv.h": "c",
-        "wchar.h": "c"
+        "wchar.h": "c",
+        "stdio.h": "c",
+        "history.h": "c"
     }
 }

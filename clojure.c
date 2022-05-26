@@ -1,13 +1,12 @@
-
 #include "clojure.h"
 // list.c
 list list_make(gptr data_ptr) { return list_push(NULL, data_ptr); }
 
 list list_push(list lst, gptr data_ptr) {
-  pair *new_head = GC_malloc(sizeof(pair));
-  new_head->data = data_ptr;
-  new_head->next = lst;
-  return new_head;
+  pair *n = GC_malloc(sizeof(pair));
+  n->data = data_ptr;
+  n->next = lst;
+  return n;
 }
 //获取node data
 // gptr list_peek(list lst) {
@@ -19,9 +18,7 @@ list list_push(list lst, gptr data_ptr) {
 // }
 long list_count(list lst) {
   /* handle empty case */
-  if (!lst) {
-    return 0;
-  }
+  if (!lst) { return 0; }
   long counter = 1;
   while (lst->next) {
     counter++;
@@ -71,9 +68,7 @@ list list_concatenate(list lst1, list lst2) {
 gptr list_nth(list lst, int n) {
   int idx = 0;
   while (lst) {
-    if (n == idx) {
-      return lst->data;
-    }
+    if (n == idx) { return lst->data; }
     idx++;
     lst = lst->next;
   }
@@ -81,11 +76,7 @@ gptr list_nth(list lst, int n) {
 }
 
 gptr list_first(list lst) {
-  if (lst) {
-    return lst->data;
-  } else {
-    return NULL;
-  }
+  return lst?lst->data:NULL;
 }
 
 list list_rest(list lst) {
@@ -97,9 +88,7 @@ list list_rest(list lst) {
 }
 
 list list_copy(list lst) {
-  if (!lst) {
-    return NULL;
-  }
+  if (!lst) { return NULL; }
   list new_lst = NULL;
   while (lst) {
     new_lst = list_push(new_lst, lst->data);
@@ -2449,13 +2438,10 @@ MalType *mal_time_ms(list args) {
 }
 
 MalType *mal_conj(list args) {
-
   if (!args || !args->next) {
     return make_error("'conj': Expected at least two arguments");
   }
-
   MalType *lst = args->data;
-
   if (!is_sequential(lst)) {
     return make_error_fmt(
         "'conj': first argument is not a list or vector: '%s'\n",
@@ -2486,9 +2472,7 @@ MalType *mal_seq(list args) {
   if (!args || args->next) {
     return make_error("'seq': expected exactly one argument");
   }
-
   MalType *val = args->data;
-
   if (is_sequential(val)) {
     /* empy list or vector */
     if (!val->value.mal_list) {
@@ -2532,7 +2516,6 @@ MalType *mal_meta(list args) {
     return val->metadata;
   }
 }
-// 哮天犬  旺旺碎冰冰
 MalType *mal_with_meta(list args) {
   if (!args || !args->next || args->next->next) {
     return make_error("'with-meta': expected exactly two arguments");
@@ -2689,58 +2672,38 @@ char *pr_str(MalType *val, int readably) {
       return snprintfbuf(STRING_BUFFER_SIZE, "%s", val->value.mal_string);
     }
     break;
-
   case MALTYPE_TRUE:
-
     return PRINT_TRUE;
     break;
-
   case MALTYPE_FALSE:
-
     return PRINT_FALSE;
     break;
-
   case MALTYPE_NIL:
-
     return PRINT_NIL;
     break;
-
   case MALTYPE_LIST:
-
     return pr_str_list(val->value.mal_list, readably, "(", ")", " ");
     break;
-
   case MALTYPE_VECTOR:
-
     return pr_str_list(val->value.mal_list, readably, "[", "]", " ");
     break;
-
   case MALTYPE_HASHMAP:
-
     return pr_str_list(val->value.mal_list, readably, "{", "}", " ");
     break;
-
   case MALTYPE_FUNCTION:
-
-    return snprintfbuf(FUNCTION_BUFFER_SIZE, "#<function::native@%p>",
-                       val->value.mal_function);
+    return snprintfbuf(FUNCTION_BUFFER_SIZE, "#<function::native@%p>", val->value.mal_function);
     break;
-
   case MALTYPE_CLOSURE: {
     MalType *definition = (val->value.mal_closure)->definition;
     MalType *parameters = (val->value.mal_closure)->parameters;
     MalType *more_symbol = (val->value.mal_closure)->more_symbol;
-
     list lst = parameters->value.mal_list;
-
     if (more_symbol) {
       lst = list_reverse(lst);
       lst = list_push(lst,
-                      make_symbol(snprintfbuf(STRING_BUFFER_SIZE, "%s%s", "&",
-                                              more_symbol->value.mal_symbol)));
+                      make_symbol(snprintfbuf(STRING_BUFFER_SIZE, "%s%s", "&", more_symbol->value.mal_symbol)));
       lst = list_reverse(lst);
     }
-
     if (val->is_macro) {
       return snprintfbuf(
           FUNCTION_BUFFER_SIZE, "#<function::macro: (fn* %s %s))",
@@ -3010,12 +2973,12 @@ TCE_entry_point:
   }
 }
 
-void PRINT(MalType *val) {
+void prn(MalType *val) {
   char *output = pr_str(val, READABLY);
   printf("%s\n", output);
 }
 
-void rep(char *str, Env *env) { PRINT(EVAL(READ(str), env)); }
+void rep(char *str, Env *env) { prn(EVAL(READ(str), env)); }
 
 /* declare as global so it can be accessed by mal_eval */
 Env *global_env;
@@ -3602,49 +3565,43 @@ int is_macro_call(MalType *ast, Env *env) {
 int main(int argc, char **argv) {
   Env *repl_env = env_make(NULL, NULL, NULL, NULL);
   global_env = repl_env;
-
   ns *core_ns = ns_make_core();
   hashmap mappings = core_ns->mappings;
-
   while (mappings) {
     char *symbol = mappings->data;
     MalType *(*function)(list) = mappings->next->data;
     env_set_C_fn(repl_env, symbol, function);
-    mappings =
-        mappings->next->next; /* pop symbol and function from hashmap/list */
+    /* pop symbol and function from hashmap/list */
+    mappings = mappings->next->next; 
   }
 
   env_set_C_fn(repl_env, "eval", mal_eval);
   env_set_C_fn(repl_env, "readline", mal_readline);
 
   /* add functions written in mal - not using rep as it prints the result */
-  EVAL(READ("(def! not (fn* (a) (if a false true)))"), repl_env);
-  EVAL(READ("(def! load-file (fn* (f) (eval (read-string (str \"(do \" (slurp "
-            "f) \"\nnil)\")))))"),
-       repl_env);
-  EVAL(READ("(defmacro! cond (fn* (& xs) (if (> (count xs) 0) (list 'if (first "
-            "xs) (if (> (count xs) 1) (nth xs 1) (throw \"odd number of forms "
-            "to cond\")) (cons 'cond (rest (rest xs)))))))"),
-       repl_env);
+  rep("(def! not (fn* (a) (if a false true)))", repl_env);
+  rep("(def! load-file (fn* (f) (eval (read-string (str \"(do \" (slurp f) \"\nnil)\")))))", repl_env);
+  rep("(defmacro! cond (fn* (& xs) (if (> (count xs) 0) (list 'if (first xs) (if (> (count xs) 1) (nth xs 1) (throw \"odd number of forms to cond\")) (cons 'cond (rest (rest xs)))))))", repl_env);
 
-  EVAL(READ("(load-file \"core.clj\")"), repl_env);
+
+  rep("(load-file \"core.clj\")", repl_env);
   /* make command line arguments available in the environment */
   list lst = NULL;
   for (long i = 2; i < argc; i++) {
     lst = list_push(lst, make_string(argv[i]));
   }
   env_set(repl_env, make_symbol("*ARGV*"), make_list(list_reverse(lst)));
-  env_set(repl_env, make_symbol("*host-language*"), make_string("c.2"));
+  env_set(repl_env, make_symbol("*host-language*"), make_string("fengge-c.2"));
 
   /* first argument on command line is filename */
   if (argc > 1) {
     char *load_command = snprintfbuf(1024, "(load-file \"%s\")", argv[1]);
-    EVAL(READ(load_command), repl_env);
+    rep(load_command, repl_env);
   } else {
-    EVAL(READ("(println (str \"Mal [\" *host-language* \"]\"))"), repl_env);
+    rep("(println (str \"Mal [\" *host-language* \"]\"))", repl_env);
     while (1) {
       char *input = readline(PROMPT_STRING);
-      // if (!input) { printf("\n"); return 0; } /* Check for EOF (Ctrl-D) */
+      if (!input) { printf("\n"); return 0; } /* Check for EOF (Ctrl-D) */
       add_history(input);
       rep(input, repl_env);
       free(input);
@@ -3655,4 +3612,5 @@ int main(int argc, char **argv) {
 
 // gcc clojure.c -ledit -lgc
 // gcc -std=c99 -g -Wall clojure.c -ledit -lgc
-// vscode 字体 monaco
+// (def! one (fn* [x] (+ 2 x)))
+// a lowercase letter It looks comfortable

@@ -1,6 +1,7 @@
 *.out
 .idea
-.vscode
+settings.json
+/.vscode
 /target
 /lib
 /classes
