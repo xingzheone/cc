@@ -502,14 +502,14 @@ Reader *tokenize(char *token_string) {
     case '@':
     case '`':
     case '^':
-      next = read_fixed_length_token(next, &token, 1);
+      next = read_specil_token(next, &token, 1);
       break;
       /* single or double character token */
     case '~':
       if (*(next + 1) == '@') {
-        next = read_fixed_length_token(next, &token, 2);
+        next = read_specil_token(next, &token, 2);
       } else {
-        next = read_fixed_length_token(next, &token, 1);
+        next = read_specil_token(next, &token, 1);
       }
       break;
       /* read string of characters within double quotes */
@@ -573,7 +573,7 @@ Reader *tokenize(char *token_string) {
   return reader;
 }
 
-char *read_fixed_length_token(char *current, Token **ptoken, int n) {
+char *read_specil_token(char *current, Token **ptoken, int n) {
   *ptoken = token_allocate(current, n, TOKEN_SPECIAL_CHARACTER, NULL);
   return (current + n);
 }
@@ -1836,15 +1836,13 @@ maltype *mal_swap_bang(list args) {
   maltype *val = args->data;
 
   if (!is_atom(val)) {
-    return make_error_fmt("'swap!': first argument is not an atom '%s'",
-                          pr_str(val, UNREADABLY));
+    return make_error_fmt("'swap!': first argument is not an atom '%s'", pr_str(val, UNREADABLY));
   }
 
   maltype *fn = args->next->data;
 
   if (!is_callable(fn)) {
-    return make_error_fmt("'swap!': second argument is not callable '%s'",
-                          pr_str(fn, UNREADABLY));
+    return make_error_fmt("'swap!': second argument is not callable '%s'", pr_str(fn, UNREADABLY));
   }
 
   list fn_args = args->next->next;
@@ -2368,15 +2366,12 @@ maltype *mal_fn_questionmark(list args) {
     return make_false();
   }
 }
-
 maltype *mal_macro_questionmark(list args) {
 
   if (!args || args->next) {
     return make_error("'macro?': expected a single argument");
   }
-
   maltype *val = args->data;
-
   if (is_macro(val)) {
     return make_true();
   } else {
@@ -2385,11 +2380,9 @@ maltype *mal_macro_questionmark(list args) {
 }
 
 maltype *mal_time_ms(list args) {
-
   struct timeval tv;
   gettimeofday(&tv, NULL);
   long ms = tv.tv_sec * 1000 + tv.tv_usec / 1000.0 + 0.5;
-
   return make_float(ms);
 }
 
@@ -2399,9 +2392,7 @@ maltype *mal_conj(list args) {
   }
   maltype *lst = args->data;
   if (!is_sequential(lst)) {
-    return make_error_fmt(
-        "'conj': first argument is not a list or vector: '%s'\n",
-        pr_str(lst, UNREADABLY));
+    return make_error_fmt( "'conj': first argument is not a list or vector: '%s'\n", pr_str(lst, UNREADABLY));
   }
   list rest = args->next;
   if (is_list(lst)) {
@@ -2411,11 +2402,8 @@ maltype *mal_conj(list args) {
       rest = rest->next;
     }
     return make_list(new_lst);
-  } else /* is_vector(lst) */
-  {
-
+  } else { /* is_vector(lst) */
     list new_lst = list_copy(lst->value.mal_list);
-
     while (rest) {
       new_lst = list_push(new_lst, rest->data);
       rest = rest->next;
@@ -2622,8 +2610,7 @@ char *pr_str(maltype *val, int readably) {
     break;
   case MALTYPE_STRING:
     if (readably) {
-      return snprintfbuf(STRING_BUFFER_SIZE, "%s",
-                         escape_string(val->value.mal_string));
+      return snprintfbuf(STRING_BUFFER_SIZE, "%s", escape_string(val->value.mal_string));
     } else {
       return snprintfbuf(STRING_BUFFER_SIZE, "%s", val->value.mal_string);
     }
@@ -2656,33 +2643,23 @@ char *pr_str(maltype *val, int readably) {
     list lst = parameters->value.mal_list;
     if (more_symbol) {
       lst = list_reverse(lst);
-      lst = list_push(lst,
-                      make_symbol(snprintfbuf(STRING_BUFFER_SIZE, "%s%s", "&", more_symbol->value.mal_symbol)));
+      lst = list_push(lst, make_symbol(snprintfbuf(STRING_BUFFER_SIZE, "%s%s", "&", more_symbol->value.mal_symbol)));
       lst = list_reverse(lst);
     }
     if (val->is_macro) {
-      return snprintfbuf(
-          FUNCTION_BUFFER_SIZE, "#<function::macro: (fn* %s %s))",
+      return snprintfbuf( FUNCTION_BUFFER_SIZE, "#<function::macro: (fn* %s %s))",
           pr_str(make_list(lst), UNREADABLY), pr_str(definition, UNREADABLY));
     } else {
-      return snprintfbuf(
-          FUNCTION_BUFFER_SIZE, "#<function::closure: (fn* %s %s))",
+      return snprintfbuf( FUNCTION_BUFFER_SIZE, "#<function::closure: (fn* %s %s))",
           pr_str(make_list(lst), UNREADABLY), pr_str(definition, UNREADABLY));
     }
   } break;
-
   case MALTYPE_ATOM:
-
-    return snprintfbuf(STRING_BUFFER_SIZE, "(atom %s)",
-                       pr_str(val->value.mal_atom, readably));
+    return snprintfbuf(STRING_BUFFER_SIZE, "(atom %s)", pr_str(val->value.mal_atom, readably));
     break;
-
   case MALTYPE_ERROR:
-
-    return snprintfbuf(STRING_BUFFER_SIZE, "Uncaught error: %s",
-                       pr_str(val->value.mal_error, UNREADABLY));
+    return snprintfbuf(STRING_BUFFER_SIZE, "Uncaught error: %s", pr_str(val->value.mal_error, UNREADABLY));
     break;
-
   default:
     /* can't happen unless a new MalType is added */
     return "Printer error: unknown type\n";
@@ -2690,8 +2667,7 @@ char *pr_str(maltype *val, int readably) {
   }
 }
 
-char *pr_str_list(list lst, int readably, char *start_delimiter,
-                  char *end_delimiter, char *separator) {
+char *pr_str_list(list lst, int readably, char *start_delimiter, char *end_delimiter, char *separator) {
   char *list_buffer = GC_MALLOC(sizeof(*list_buffer) * LIST_BUFFER_SIZE);
   long buffer_length = LIST_BUFFER_SIZE;
 
@@ -2705,47 +2681,41 @@ char *pr_str_list(list lst, int readably, char *start_delimiter,
     /* concatenate next element */
     maltype *data = lst->data;
     char *str = pr_str(data, readably);
-
     len = strlen(str);
     count += len;
 
-    if (count >= buffer_length) {
-      buffer_length += (count + 1);
-      list_buffer = GC_REALLOC(list_buffer, buffer_length);
-    }
+    // if (count >= buffer_length) {
+    //   buffer_length += (count + 1);
+    //   list_buffer = GC_REALLOC(list_buffer, buffer_length);
+    // }
     strncat(list_buffer, str, len);
     lst = lst->next;
     if (lst) {
       len = strlen(separator);
       count += len;
-
-      if (count >= buffer_length) {
-        buffer_length += (count + 1);
-        list_buffer = GC_REALLOC(list_buffer, buffer_length);
-      }
+      // if (count >= buffer_length) {
+      //   buffer_length += (count + 1);
+      //   list_buffer = GC_REALLOC(list_buffer, buffer_length);
+      // }
       /* add the separator */
       strncat(list_buffer, separator, len);
     }
   }
 
-  if (count >= buffer_length) {
-    len = strlen(end_delimiter);
-    count += len;
+  // if (count >= buffer_length) {
+  //   len = strlen(end_delimiter);
+  //   count += len;
+  //   buffer_length += (count + 1);
+  //   list_buffer = GC_REALLOC(list_buffer, buffer_length);
+  // }
 
-    buffer_length += (count + 1);
-    list_buffer = GC_REALLOC(list_buffer, buffer_length);
-  }
-
-  /* add the end delimiter */
   strncat(list_buffer, end_delimiter, len);
-
   return list_buffer;
 }
 
 // 转义
 char *escape_string(char *str) {
-  long buffer_length =
-      2 * (strlen(str) + 1); /* allocate a reasonable initial buffer size */
+  long buffer_length = 2 * (strlen(str) + 1); /* allocate a reasonable initial buffer size */
   char *buffer = GC_MALLOC(sizeof(*buffer) * buffer_length);
   strcpy(buffer, "\"");
   char *curr = str;
@@ -2872,7 +2842,6 @@ TCE_entry_point:
       }
       goto TCE_entry_point;
     } else if (strcmp(symbol, SYMBOL_QUASIQUOTEEXPAND) == 0) {
-
       list lst = ast->value.mal_list;
       return eval_quasiquote(make_list(lst));
     } else if (strcmp(symbol, SYMBOL_DEFMACROBANG) == 0) {
